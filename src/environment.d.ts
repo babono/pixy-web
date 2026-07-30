@@ -5,6 +5,11 @@ declare global {
       DATABASE_URL: string
       NEXT_PUBLIC_SERVER_URL: string
       VERCEL_PROJECT_PRODUCTION_URL: string
+      // Optional — media falls back to public/media when these are unset
+      CLOUDINARY_CLOUD_NAME?: string
+      CLOUDINARY_API_KEY?: string
+      CLOUDINARY_API_SECRET?: string
+      CLOUDINARY_FOLDER?: string
     }
   }
 }

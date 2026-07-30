@@ -45,6 +45,28 @@
   --breakpoint-2xl: 86rem;
   --font-mono: var(--font-geist-mono);
   --font-sans: var(--font-geist-sans);
+  /* Geometric display face used for the PIXY wordmark, section headings and buttons */
+  --font-display: var(--font-jost), var(--font-geist-sans), sans-serif;
+
+  /* --- PIXY brand palette ------------------------------------------------ */
+  --color-pixy-rose: #b5697f;
+  --color-pixy-rose-dark: #9c5568;
+  --color-pixy-rose-light: #c98da0;
+  --color-pixy-crimson: #b54a63;
+  --color-pixy-heading: #a85b6e;
+  --color-pixy-ink: #2b2b2b;
+  --color-pixy-muted: #6f6f6f;
+  --color-pixy-blush-50: #fdf3f7;
+  --color-pixy-blush-100: #fbe6ed;
+  --color-pixy-blush-200: #f7d2de;
+  --color-pixy-blush-300: #f2bccd;
+  --color-pixy-cream: #faf7f5;
+
+  /* Category tile tints, mirrored by the `tint` select on product categories */
+  --color-pixy-tile-lavender: #d3c4ec;
+  --color-pixy-tile-sky: #a9d6ee;
+  --color-pixy-tile-mint: #a9e0d3;
+  --color-pixy-tile-pink: #f4c7d4;
 }
 
 @layer utilities {
@@ -222,3 +244,65 @@ html[data-theme='dark'],
 html[data-theme='light'] {
   opacity: initial;
 }
+
+/* ---------------------------------------------------------------------------
+ * PIXY storefront
+ *
+ * The storefront is a light-only brand surface: it opts out of the template's
+ * dark theme by always painting its own background/foreground.
+ * ------------------------------------------------------------------------- */
+
+@layer components {
+  /* Wide, airy uppercase section titles ("REAL BEAUTY, ROOTED IN QUALITY") */
+  .pixy-heading {
+    font-family: var(--font-display);
+    font-weight: 300;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1.2;
+    color: var(--color-pixy-heading);
+  }
+
+  /* Small uppercase labels: breadcrumbs, eyebrows, tags */
+  .pixy-eyebrow {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .pixy-wordmark {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  /* Blush gradient used behind the brand-values and shop-now bands */
+  .pixy-gradient-blush {
+    background-image: linear-gradient(
+      180deg,
+      var(--color-pixy-blush-100) 0%,
+      var(--color-pixy-blush-300) 100%
+    );
+  }
+
+  .pixy-gradient-blush-soft {
+    background-image: linear-gradient(
+      180deg,
+      var(--color-pixy-blush-50) 0%,
+      var(--color-pixy-blush-200) 100%
+    );
+  }
+
+  .pixy-gradient-rose {
+    background-image: linear-gradient(
+      180deg,
+      var(--color-pixy-rose-light) 0%,
+      var(--color-pixy-rose) 100%
+    );
+  }
+}
+
+/* Category tile tints are chosen in the CMS, so Tailwind cannot see them */
+@source inline("bg-pixy-tile-{lavender,sky,mint,pink}");

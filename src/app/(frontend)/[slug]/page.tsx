@@ -7,8 +7,9 @@ import { draftMode } from 'next/headers'
 import React, { cache } from 'react'
 import { homeStatic } from '@/endpoints/seed/home-static'
 
-import { RenderBlocks } from '@/blocks/RenderBlocks'
+import { RenderBlocks, isBleedBlock } from '@/blocks/RenderBlocks'
 import { RenderHero } from '@/heros/RenderHero'
+import { cn } from '@/utilities/ui'
 import { generateMeta } from '@/utilities/generateMeta'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
@@ -66,8 +67,13 @@ export default async function Page({ params: paramsPromise }: Args) {
 
   const { hero, layout } = page
 
+  // Storefront bands paint edge-to-edge and carry their own padding, so the
+  // article only adds spacing where the outermost block is a regular one.
+  const opensWithBleed = hero?.type === 'none' && isBleedBlock(layout?.[0]?.blockType)
+  const closesWithBleed = isBleedBlock(layout?.[layout.length - 1]?.blockType)
+
   return (
-    <article className="pt-16 pb-24">
+    <article className={cn(!opensWithBleed && 'pt-28', !closesWithBleed && 'pb-24')}>
       <PageClient />
       {/* Allows redirects for valid pages too */}
       <PayloadRedirects disableNotFound url={url} />

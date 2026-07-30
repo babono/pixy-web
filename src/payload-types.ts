@@ -69,6 +69,9 @@ export interface Config {
   collections: {
     pages: Page;
     posts: Post;
+    products: Product;
+    'product-categories': ProductCategory;
+    marketplaces: Marketplace;
     media: Media;
     categories: Category;
     users: User;
@@ -91,6 +94,9 @@ export interface Config {
   collectionsSelect: {
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    products: ProductsSelect<false> | ProductsSelect<true>;
+    'product-categories': ProductCategoriesSelect<false> | ProductCategoriesSelect<true>;
+    marketplaces: MarketplacesSelect<false> | MarketplacesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -188,6 +194,14 @@ export interface Page {
               | ({
                   relationTo: 'posts';
                   value: string | Post;
+                } | null)
+              | ({
+                  relationTo: 'products';
+                  value: string | Product;
+                } | null)
+              | ({
+                  relationTo: 'product-categories';
+                  value: string | ProductCategory;
                 } | null);
             url?: string | null;
             label: string;
@@ -201,7 +215,20 @@ export interface Page {
       | null;
     media?: (string | null) | Media;
   };
-  layout: (CallToActionBlock | ContentBlock | MediaBlock | ArchiveBlock | FormBlock)[];
+  layout: (
+    | HeroCarouselBlock
+    | BrandValuesBlock
+    | CategoryGridBlock
+    | ProductGridBlock
+    | MarketplaceLinksBlock
+    | ArticleGridBlock
+    | SocialStripBlock
+    | CallToActionBlock
+    | ContentBlock
+    | MediaBlock
+    | ArchiveBlock
+    | FormBlock
+  )[];
   meta?: {
     title?: string | null;
     /**
@@ -441,6 +468,341 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products".
+ */
+export interface Product {
+  id: string;
+  title: string;
+  category: string | ProductCategory;
+  /**
+   * In rupiah, without separators. e.g. 62100 renders as Rp62.100
+   */
+  price: number;
+  /**
+   * One or two lines shown under the price, and on product cards.
+   */
+  shortDescription?: string | null;
+  /**
+   * First image is the card thumbnail. The rest become gallery slides.
+   */
+  images: (string | Media)[];
+  /**
+   * Ticked claims under the buttons, e.g. "Halal Certified".
+   */
+  highlights?:
+    | {
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Call-to-action buttons, e.g. "Try Filter" and "Buy Now".
+   */
+  actions?:
+    | {
+        label: string;
+        url: string;
+        appearance?: ('solid' | 'outline') | null;
+        icon?: ('none' | 'sparkles' | 'cart') | null;
+        newTab?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Home page product grids set to "Automatic" pull from featured products.
+   */
+  featured?: boolean | null;
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  howToUse?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * The headline score above the review cards is the average of these ratings.
+   */
+  reviews?:
+    | {
+        author: string;
+        rating: number;
+        body: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Leave empty to automatically show other products from the same category.
+   */
+  relatedProducts?: (string | Product)[] | null;
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (string | null) | Media;
+    description?: string | null;
+  };
+  publishedAt?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "product-categories".
+ */
+export interface ProductCategory {
+  id: string;
+  title: string;
+  /**
+   * Product still used on the category tile.
+   */
+  image?: (string | null) | Media;
+  /**
+   * Background colour of the category tile.
+   */
+  tint: 'lavender' | 'sky' | 'mint' | 'pink';
+  /**
+   * Shown at the top of the category listing page.
+   */
+  description?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeroCarouselBlock".
+ */
+export interface HeroCarouselBlock {
+  slides: {
+    image: string | Media;
+    /**
+     * Line breaks are preserved.
+     */
+    headline: string;
+    subheadline?: string | null;
+    link: {
+      type?: ('reference' | 'custom') | null;
+      newTab?: boolean | null;
+      reference?:
+        | ({
+            relationTo: 'pages';
+            value: string | Page;
+          } | null)
+        | ({
+            relationTo: 'posts';
+            value: string | Post;
+          } | null)
+        | ({
+            relationTo: 'products';
+            value: string | Product;
+          } | null)
+        | ({
+            relationTo: 'product-categories';
+            value: string | ProductCategory;
+          } | null);
+      url?: string | null;
+      label: string;
+    };
+    id?: string | null;
+  }[];
+  autoplay?: boolean | null;
+  intervalSeconds?: number | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'heroCarousel';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BrandValuesBlock".
+ */
+export interface BrandValuesBlock {
+  /**
+   * Line breaks are preserved.
+   */
+  heading: string;
+  body: string;
+  values?:
+    | {
+        label: string;
+        icon?: (string | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'brandValues';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CategoryGridBlock".
+ */
+export interface CategoryGridBlock {
+  heading: string;
+  /**
+   * Leave empty to show every product category.
+   */
+  categories?: (string | ProductCategory)[] | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'categoryGrid';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductGridBlock".
+ */
+export interface ProductGridBlock {
+  heading: string;
+  source: 'featured' | 'category' | 'manual';
+  category?: (string | null) | ProductCategory;
+  products?: (string | Product)[] | null;
+  limit?: number | null;
+  cta?: {
+    enabled?: boolean | null;
+    link?: {
+      type?: ('reference' | 'custom') | null;
+      newTab?: boolean | null;
+      reference?:
+        | ({
+            relationTo: 'pages';
+            value: string | Page;
+          } | null)
+        | ({
+            relationTo: 'posts';
+            value: string | Post;
+          } | null)
+        | ({
+            relationTo: 'products';
+            value: string | Product;
+          } | null)
+        | ({
+            relationTo: 'product-categories';
+            value: string | ProductCategory;
+          } | null);
+      url?: string | null;
+      label: string;
+    };
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'productGrid';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MarketplaceLinksBlock".
+ */
+export interface MarketplaceLinksBlock {
+  heading: string;
+  /**
+   * Leave empty to show every marketplace.
+   */
+  marketplaces?: (string | Marketplace)[] | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'marketplaceLinks';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "marketplaces".
+ */
+export interface Marketplace {
+  id: string;
+  name: string;
+  /**
+   * Square marketplace logo, shown at 32×32.
+   */
+  logo?: (string | null) | Media;
+  /**
+   * Link to the PIXY official store on this marketplace.
+   */
+  url: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ArticleGridBlock".
+ */
+export interface ArticleGridBlock {
+  heading: string;
+  source: 'latest' | 'manual';
+  posts?: (string | Post)[] | null;
+  limit?: number | null;
+  cta?: {
+    enabled?: boolean | null;
+    link?: {
+      type?: ('reference' | 'custom') | null;
+      newTab?: boolean | null;
+      reference?:
+        | ({
+            relationTo: 'pages';
+            value: string | Page;
+          } | null)
+        | ({
+            relationTo: 'posts';
+            value: string | Post;
+          } | null)
+        | ({
+            relationTo: 'products';
+            value: string | Product;
+          } | null)
+        | ({
+            relationTo: 'product-categories';
+            value: string | ProductCategory;
+          } | null);
+      url?: string | null;
+      label: string;
+    };
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'articleGrid';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SocialStripBlock".
+ */
+export interface SocialStripBlock {
+  heading: string;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'socialStrip';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "CallToActionBlock".
  */
 export interface CallToActionBlock {
@@ -472,6 +834,14 @@ export interface CallToActionBlock {
             | ({
                 relationTo: 'posts';
                 value: string | Post;
+              } | null)
+            | ({
+                relationTo: 'products';
+                value: string | Product;
+              } | null)
+            | ({
+                relationTo: 'product-categories';
+                value: string | ProductCategory;
               } | null);
           url?: string | null;
           label: string;
@@ -522,6 +892,14 @@ export interface ContentBlock {
             | ({
                 relationTo: 'posts';
                 value: string | Post;
+              } | null)
+            | ({
+                relationTo: 'products';
+                value: string | Product;
+              } | null)
+            | ({
+                relationTo: 'product-categories';
+                value: string | ProductCategory;
               } | null);
           url?: string | null;
           label: string;
@@ -724,9 +1102,6 @@ export interface Form {
       )[]
     | null;
   submitButtonLabel?: string | null;
-  /**
-   * Choose whether to display an on-page message or redirect to a different page after they submit the form.
-   */
   confirmationType?: ('message' | 'redirect') | null;
   confirmationMessage?: {
     root: {
@@ -746,9 +1121,6 @@ export interface Form {
   redirect?: {
     url: string;
   };
-  /**
-   * Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}. You can use a wildcard {{*}} to output all data and {{*:table}} to format it as an HTML table in the email.
-   */
   emails?:
     | {
         emailTo?: string | null;
@@ -757,9 +1129,6 @@ export interface Form {
         replyTo?: string | null;
         emailFrom?: string | null;
         subject: string;
-        /**
-         * Enter the message that should be sent in this email.
-         */
         message?: {
           root: {
             type: string;
@@ -801,6 +1170,10 @@ export interface Redirect {
       | ({
           relationTo: 'posts';
           value: string | Post;
+        } | null)
+      | ({
+          relationTo: 'products';
+          value: string | Product;
         } | null);
     url?: string | null;
   };
@@ -834,10 +1207,15 @@ export interface Search {
   id: string;
   title?: string | null;
   priority?: number | null;
-  doc: {
-    relationTo: 'posts';
-    value: string | Post;
-  };
+  doc:
+    | {
+        relationTo: 'posts';
+        value: string | Post;
+      }
+    | {
+        relationTo: 'products';
+        value: string | Product;
+      };
   slug?: string | null;
   meta?: {
     title?: string | null;
@@ -980,6 +1358,18 @@ export interface PayloadLockedDocument {
         value: string | Post;
       } | null)
     | ({
+        relationTo: 'products';
+        value: string | Product;
+      } | null)
+    | ({
+        relationTo: 'product-categories';
+        value: string | ProductCategory;
+      } | null)
+    | ({
+        relationTo: 'marketplaces';
+        value: string | Marketplace;
+      } | null)
+    | ({
         relationTo: 'media';
         value: string | Media;
       } | null)
@@ -1084,6 +1474,13 @@ export interface PagesSelect<T extends boolean = true> {
   layout?:
     | T
     | {
+        heroCarousel?: T | HeroCarouselBlockSelect<T>;
+        brandValues?: T | BrandValuesBlockSelect<T>;
+        categoryGrid?: T | CategoryGridBlockSelect<T>;
+        productGrid?: T | ProductGridBlockSelect<T>;
+        marketplaceLinks?: T | MarketplaceLinksBlockSelect<T>;
+        articleGrid?: T | ArticleGridBlockSelect<T>;
+        socialStrip?: T | SocialStripBlockSelect<T>;
         cta?: T | CallToActionBlockSelect<T>;
         content?: T | ContentBlockSelect<T>;
         mediaBlock?: T | MediaBlockSelect<T>;
@@ -1103,6 +1500,132 @@ export interface PagesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeroCarouselBlock_select".
+ */
+export interface HeroCarouselBlockSelect<T extends boolean = true> {
+  slides?:
+    | T
+    | {
+        image?: T;
+        headline?: T;
+        subheadline?: T;
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              label?: T;
+            };
+        id?: T;
+      };
+  autoplay?: T;
+  intervalSeconds?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BrandValuesBlock_select".
+ */
+export interface BrandValuesBlockSelect<T extends boolean = true> {
+  heading?: T;
+  body?: T;
+  values?:
+    | T
+    | {
+        label?: T;
+        icon?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CategoryGridBlock_select".
+ */
+export interface CategoryGridBlockSelect<T extends boolean = true> {
+  heading?: T;
+  categories?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ProductGridBlock_select".
+ */
+export interface ProductGridBlockSelect<T extends boolean = true> {
+  heading?: T;
+  source?: T;
+  category?: T;
+  products?: T;
+  limit?: T;
+  cta?:
+    | T
+    | {
+        enabled?: T;
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              label?: T;
+            };
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MarketplaceLinksBlock_select".
+ */
+export interface MarketplaceLinksBlockSelect<T extends boolean = true> {
+  heading?: T;
+  marketplaces?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ArticleGridBlock_select".
+ */
+export interface ArticleGridBlockSelect<T extends boolean = true> {
+  heading?: T;
+  source?: T;
+  posts?: T;
+  limit?: T;
+  cta?:
+    | T
+    | {
+        enabled?: T;
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              label?: T;
+            };
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SocialStripBlock_select".
+ */
+export interface SocialStripBlockSelect<T extends boolean = true> {
+  heading?: T;
+  id?: T;
+  blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1218,6 +1741,83 @@ export interface PostsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products_select".
+ */
+export interface ProductsSelect<T extends boolean = true> {
+  title?: T;
+  category?: T;
+  price?: T;
+  shortDescription?: T;
+  images?: T;
+  highlights?:
+    | T
+    | {
+        label?: T;
+        id?: T;
+      };
+  actions?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        appearance?: T;
+        icon?: T;
+        newTab?: T;
+        id?: T;
+      };
+  featured?: T;
+  description?: T;
+  howToUse?: T;
+  reviews?:
+    | T
+    | {
+        author?: T;
+        rating?: T;
+        body?: T;
+        id?: T;
+      };
+  relatedProducts?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        image?: T;
+        description?: T;
+      };
+  publishedAt?: T;
+  generateSlug?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "product-categories_select".
+ */
+export interface ProductCategoriesSelect<T extends boolean = true> {
+  title?: T;
+  image?: T;
+  tint?: T;
+  description?: T;
+  generateSlug?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "marketplaces_select".
+ */
+export interface MarketplacesSelect<T extends boolean = true> {
+  name?: T;
+  logo?: T;
+  url?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1637,6 +2237,10 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface Header {
   id: string;
+  /**
+   * Optional. Falls back to the PIXY wordmark when empty.
+   */
+  logo?: (string | null) | Media;
   navItems?:
     | {
         link: {
@@ -1650,13 +2254,53 @@ export interface Header {
             | ({
                 relationTo: 'posts';
                 value: string | Post;
+              } | null)
+            | ({
+                relationTo: 'products';
+                value: string | Product;
+              } | null)
+            | ({
+                relationTo: 'product-categories';
+                value: string | ProductCategory;
               } | null);
           url?: string | null;
           label: string;
         };
+        /**
+         * Optional. Renders as a dropdown on desktop and an accordion on mobile.
+         */
+        subItems?:
+          | {
+              link: {
+                type?: ('reference' | 'custom') | null;
+                newTab?: boolean | null;
+                reference?:
+                  | ({
+                      relationTo: 'pages';
+                      value: string | Page;
+                    } | null)
+                  | ({
+                      relationTo: 'posts';
+                      value: string | Post;
+                    } | null)
+                  | ({
+                      relationTo: 'products';
+                      value: string | Product;
+                    } | null)
+                  | ({
+                      relationTo: 'product-categories';
+                      value: string | ProductCategory;
+                    } | null);
+                url?: string | null;
+                label: string;
+              };
+              id?: string | null;
+            }[]
+          | null;
         id?: string | null;
       }[]
     | null;
+  searchPlaceholder?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1666,7 +2310,55 @@ export interface Header {
  */
 export interface Footer {
   id: string;
-  navItems?:
+  tagline?: string | null;
+  /**
+   * Each column becomes one heading with a list of links beneath it.
+   */
+  columns?:
+    | {
+        title: string;
+        navItems?:
+          | {
+              link: {
+                type?: ('reference' | 'custom') | null;
+                newTab?: boolean | null;
+                reference?:
+                  | ({
+                      relationTo: 'pages';
+                      value: string | Page;
+                    } | null)
+                  | ({
+                      relationTo: 'posts';
+                      value: string | Post;
+                    } | null)
+                  | ({
+                      relationTo: 'products';
+                      value: string | Product;
+                    } | null)
+                  | ({
+                      relationTo: 'product-categories';
+                      value: string | ProductCategory;
+                    } | null);
+                url?: string | null;
+                label: string;
+              };
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Rendered in the "Stay Connected" strip and in the footer.
+   */
+  socialLinks?:
+    | {
+        platform: 'youtube' | 'facebook' | 'x' | 'tiktok' | 'instagram' | 'whatsapp';
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  localeLinks?:
     | {
         link: {
           type?: ('reference' | 'custom') | null;
@@ -1679,6 +2371,14 @@ export interface Footer {
             | ({
                 relationTo: 'posts';
                 value: string | Post;
+              } | null)
+            | ({
+                relationTo: 'products';
+                value: string | Product;
+              } | null)
+            | ({
+                relationTo: 'product-categories';
+                value: string | ProductCategory;
               } | null);
           url?: string | null;
           label: string;
@@ -1686,6 +2386,35 @@ export interface Footer {
         id?: string | null;
       }[]
     | null;
+  legalLinks?:
+    | {
+        link: {
+          type?: ('reference' | 'custom') | null;
+          newTab?: boolean | null;
+          reference?:
+            | ({
+                relationTo: 'pages';
+                value: string | Page;
+              } | null)
+            | ({
+                relationTo: 'posts';
+                value: string | Post;
+              } | null)
+            | ({
+                relationTo: 'products';
+                value: string | Product;
+              } | null)
+            | ({
+                relationTo: 'product-categories';
+                value: string | ProductCategory;
+              } | null);
+          url?: string | null;
+          label: string;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  copyright?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1694,6 +2423,7 @@ export interface Footer {
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
+  logo?: T;
   navItems?:
     | T
     | {
@@ -1706,8 +2436,23 @@ export interface HeaderSelect<T extends boolean = true> {
               url?: T;
               label?: T;
             };
+        subItems?:
+          | T
+          | {
+              link?:
+                | T
+                | {
+                    type?: T;
+                    newTab?: T;
+                    reference?: T;
+                    url?: T;
+                    label?: T;
+                  };
+              id?: T;
+            };
         id?: T;
       };
+  searchPlaceholder?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1717,7 +2462,35 @@ export interface HeaderSelect<T extends boolean = true> {
  * via the `definition` "footer_select".
  */
 export interface FooterSelect<T extends boolean = true> {
-  navItems?:
+  tagline?: T;
+  columns?:
+    | T
+    | {
+        title?: T;
+        navItems?:
+          | T
+          | {
+              link?:
+                | T
+                | {
+                    type?: T;
+                    newTab?: T;
+                    reference?: T;
+                    url?: T;
+                    label?: T;
+                  };
+              id?: T;
+            };
+        id?: T;
+      };
+  socialLinks?:
+    | T
+    | {
+        platform?: T;
+        url?: T;
+        id?: T;
+      };
+  localeLinks?:
     | T
     | {
         link?:
@@ -1731,6 +2504,21 @@ export interface FooterSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  legalLinks?:
+    | T
+    | {
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              label?: T;
+            };
+        id?: T;
+      };
+  copyright?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1761,6 +2549,10 @@ export interface TaskSchedulePublish {
       | ({
           relationTo: 'posts';
           value: string | Post;
+        } | null)
+      | ({
+          relationTo: 'products';
+          value: string | Product;
         } | null);
     global?: string | null;
     user?: (string | null) | User;

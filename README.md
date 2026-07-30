@@ -222,17 +222,59 @@ Alternatively, you can use [Docker](https://www.docker.com) to spin up this temp
 
 That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
 
+### Media storage
+
+Uploads go to **Cloudinary** when all three of these are set, and to `public/media`
+when they aren't — so a fresh clone runs without a Cloudinary account:
+
+```bash
+CLOUDINARY_CLOUD_NAME=babono
+CLOUDINARY_API_KEY=...
+CLOUDINARY_API_SECRET=...
+CLOUDINARY_FOLDER=pixy   # optional, defaults to "pixy"
+```
+
+Payload has no official Cloudinary adapter, so `src/storage/cloudinary.ts`
+implements the `@payloadcms/plugin-cloud-storage` adapter contract against the
+official Cloudinary SDK. Files land at `<folder>/<filename>` with the extension
+kept in the `public_id`, which makes upload, delete and URL generation
+symmetric and lets Payload's generated image sizes round-trip unchanged:
+
+```
+https://res.cloudinary.com/babono/image/upload/pixy/pixy-hero-1.webp
+https://res.cloudinary.com/babono/image/upload/pixy/pixy-hero-1-300x200.webp
+```
+
+That URL is what gets stored on the media document in MongoDB —
+`disablePayloadAccessControl` is on, so images are served straight from
+Cloudinary's CDN rather than proxied through `/api/media/file`. Media documents
+keep every other field (alt text, sizes, focal point) in MongoDB as usual.
+
+Because uploads use `overwrite: true` with deterministic filenames, re-seeding
+replaces the same Cloudinary assets rather than piling up duplicates. Renaming
+a seeded file will orphan the old asset — delete those in the Cloudinary console.
+
 ### Seed
 
-To seed the database with a few pages, posts, and projects you can click the 'seed database' link from the admin panel.
+```bash
+pnpm seed
+```
 
-The seed script will also create a demo user for demonstration purposes only:
+Populates the PIXY demo: 8 products across 4 categories, 4 marketplaces, 4
+articles, the block-based home page, and the header/footer globals. Product
+imagery is placeholder art generated with sharp (see
+`src/endpoints/seed/pixy/images.ts`) — replace it with real uploads in the admin
+and nothing else needs to change.
 
-- Demo Author
-  - Email: `demo-author@payloadcms.com`
+The seed also creates a demo user for demonstration purposes only:
+
+- PIXY Editorial
+  - Email: `demo-author@example.com`
   - Password: `password`
 
-> NOTICE: seeding the database is destructive because it drops your current database to populate a fresh one from the seed template. Only run this command if you are starting a new project or can afford to lose your current data.
+> NOTICE: seeding is destructive. It clears the seeded collections, the
+> header/footer globals, and the local `public/media` upload directory before
+> repopulating. Only run it against a demo database.
 
 ## Production
 

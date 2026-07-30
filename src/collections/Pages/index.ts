@@ -3,10 +3,17 @@ import type { CollectionConfig } from 'payload'
 import { authenticated } from '../../access/authenticated'
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
 import { Archive } from '../../blocks/ArchiveBlock/config'
+import { ArticleGrid } from '../../blocks/ArticleGrid/config'
+import { BrandValues } from '../../blocks/BrandValues/config'
 import { CallToAction } from '../../blocks/CallToAction/config'
+import { CategoryGrid } from '../../blocks/CategoryGrid/config'
 import { Content } from '../../blocks/Content/config'
 import { FormBlock } from '../../blocks/Form/config'
+import { HeroCarousel } from '../../blocks/HeroCarousel/config'
+import { MarketplaceLinks } from '../../blocks/MarketplaceLinks/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
+import { ProductGrid } from '../../blocks/ProductGrid/config'
+import { SocialStrip } from '../../blocks/SocialStrip/config'
 import { hero } from '@/heros/config'
 import { slugField } from 'payload'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
@@ -72,7 +79,22 @@ export const Pages: CollectionConfig<'pages'> = {
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock],
+              blocks: [
+                // PIXY storefront blocks
+                HeroCarousel,
+                BrandValues,
+                CategoryGrid,
+                ProductGrid,
+                MarketplaceLinks,
+                ArticleGrid,
+                SocialStrip,
+                // Generic template blocks
+                CallToAction,
+                Content,
+                MediaBlock,
+                Archive,
+                FormBlock,
+              ],
               required: true,
               admin: {
                 initCollapsed: true,

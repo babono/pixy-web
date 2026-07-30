@@ -33,6 +33,12 @@ const nextConfig: NextConfig = {
           protocol: url.protocol.replace(':', '') as 'http' | 'https',
         }
       }),
+      // Media is served straight from Cloudinary when CLOUDINARY_* is configured
+      {
+        hostname: 'res.cloudinary.com',
+        protocol: 'https' as const,
+        pathname: '/**',
+      },
     ],
   },
   webpack: (webpackConfig) => {
