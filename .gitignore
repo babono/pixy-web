@@ -31,3 +31,6 @@ node_modules/
 
 # MediaPipe WASM, regenerated from node_modules by scripts/sync-mediapipe.ts
 public/mediapipe-wasm/
+
+# Local .env backups (contain credentials)
+.env.*.bak

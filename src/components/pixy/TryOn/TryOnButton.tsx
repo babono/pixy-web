@@ -8,7 +8,7 @@ import type { Product } from '@/payload-types'
 
 import { cn } from '@/utilities/ui'
 
-import type { TryOnShade } from './ShadeSwatches'
+import type { TryOnShade } from './shades'
 
 /**
  * The filter pulls in MediaPipe plus an 11MB WASM runtime and a 3.7MB model.

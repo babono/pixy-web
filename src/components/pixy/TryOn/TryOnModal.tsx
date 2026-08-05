@@ -8,7 +8,8 @@ import type { Product } from '@/payload-types'
 import { Dialog, DialogClose, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { cn } from '@/utilities/ui'
 
-import { ShadeSwatches, type TryOnShade } from './ShadeSwatches'
+import { ShadeSwatches } from './ShadeSwatches'
+import type { TryOnShade } from './shades'
 import { useLipRenderer } from './useLipRenderer'
 
 type Props = {

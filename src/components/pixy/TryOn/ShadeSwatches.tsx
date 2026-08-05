@@ -3,20 +3,9 @@
 import { Check } from 'lucide-react'
 import React from 'react'
 
-import type { Product } from '@/payload-types'
-
 import { cn } from '@/utilities/ui'
 
-export type TryOnShade = NonNullable<Product['shades']>[number] & { swatch: string }
-
-/**
- * A shade is only usable by the filter if it carries a hex colour — an image
- * alone tells us nothing about what to paint.
- */
-export const tryOnShades = (product: Pick<Product, 'shades'>): TryOnShade[] =>
-  (product.shades ?? []).filter((shade): shade is TryOnShade =>
-    Boolean(shade.swatch && /^#[0-9a-fA-F]{6}$/.test(shade.swatch)),
-  )
+import type { TryOnShade } from './shades'
 
 type Props = {
   onSelect: (shade: TryOnShade) => void

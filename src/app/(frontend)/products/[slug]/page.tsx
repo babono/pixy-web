@@ -20,7 +20,7 @@ import { ProductGallery } from '@/components/pixy/ProductGallery'
 import { ProductReviews } from '@/components/pixy/ProductReviews'
 import { SectionHeading } from '@/components/pixy/SectionHeading'
 import { TryOnButton } from '@/components/pixy/TryOn/TryOnButton'
-import { tryOnShades } from '@/components/pixy/TryOn/ShadeSwatches'
+import { tryOnShades } from '@/components/pixy/TryOn/shades'
 import { generateMeta } from '@/utilities/generateMeta'
 import PageClient from './page.client'
 
