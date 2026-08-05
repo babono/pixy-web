@@ -24,7 +24,11 @@ export const VideoMedia: React.FC<MediaProps> = (props) => {
   }, [])
 
   if (resource && typeof resource === 'object') {
-    const { filename } = resource
+    const { filename, url } = resource
+
+    // `url` is authoritative — with a cloud storage adapter the file is not
+    // served from /media at all, so deriving the path from the filename 404s.
+    const src = url ? getMediaUrl(url) : getMediaUrl(`/media/${filename}`)
 
     return (
       <video
@@ -37,7 +41,7 @@ export const VideoMedia: React.FC<MediaProps> = (props) => {
         playsInline
         ref={videoRef}
       >
-        <source src={getMediaUrl(`/media/${filename}`)} />
+        <source src={src} />
       </video>
     )
   }

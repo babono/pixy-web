@@ -3,17 +3,27 @@ import type { Metadata } from 'next'
 import { cn } from '@/utilities/ui'
 import { GeistMono } from 'geist/font/mono'
 import { GeistSans } from 'geist/font/sans'
-import { Jost } from 'next/font/google'
+import { Inter, Syncopate } from 'next/font/google'
 import React from 'react'
 
-// Geometric grotesque that carries the PIXY wordmark and section headings
-const jost = Jost({
+// Wide geometric face the design reserves for section headings and the hero
+// headline — always uppercase, never body copy.
+const syncopate = Syncopate({
   subsets: ['latin'],
-  variable: '--font-jost',
+  weight: ['400', '700'],
+  variable: '--font-syncopate',
+  display: 'swap',
+})
+
+// Everything that is not a heading: body copy, labels, buttons, nav, prices.
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
   display: 'swap',
 })
 
 import { AdminBar } from '@/components/AdminBar'
+import { WhatsAppWidget } from '@/components/WhatsAppWidget'
 import { Footer } from '@/Footer/Component'
 import { Header } from '@/Header/Component'
 import { Providers } from '@/providers'
@@ -29,7 +39,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html
-      className={cn(GeistSans.variable, GeistMono.variable, jost.variable)}
+      className={cn(GeistSans.variable, GeistMono.variable, syncopate.variable, inter.variable)}
       lang="en"
       suppressHydrationWarning
     >
@@ -49,6 +59,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <Header />
           {children}
           <Footer />
+          <WhatsAppWidget />
         </Providers>
       </body>
     </html>

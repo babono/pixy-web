@@ -83,7 +83,7 @@ export const ArticleGridBlock: React.FC<ArticleGridBlockProps> = async ({
           <div className="mt-10 flex justify-center">
             <CMSLink
               {...cta.link}
-              className="inline-flex h-11 items-center justify-center rounded-full bg-pixy-rose px-14 font-display text-sm font-medium tracking-[0.12em] text-white uppercase transition-colors hover:bg-pixy-rose-dark"
+              className="inline-flex h-11 items-center justify-center rounded-full bg-pixy-rose px-14 pixy-button-label text-white transition-colors hover:bg-pixy-rose-dark"
             />
           </div>
         )}

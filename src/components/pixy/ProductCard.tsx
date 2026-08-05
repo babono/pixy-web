@@ -39,7 +39,7 @@ export const ProductCard: React.FC<Props> = ({ className, product, sizes }) => {
 
       <div className="flex flex-1 flex-col gap-1 p-3 md:p-4">
         <h3 className="line-clamp-2 text-sm leading-snug text-pixy-ink md:text-base">{title}</h3>
-        <p className="mt-auto pt-1 text-sm font-semibold text-pixy-crimson md:text-base">
+        <p className="mt-auto pt-1 text-sm font-semibold text-pixy-rose md:text-base">
           {formatPrice(price)}
         </p>
       </div>

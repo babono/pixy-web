@@ -6,7 +6,7 @@ import type { Theme, ThemeContextType } from './types'
 
 import canUseDOM from '@/utilities/canUseDOM'
 import { defaultTheme, getImplicitPreference, themeLocalStorageKey } from './shared'
-import { themeIsValid } from './types'
+
 
 const initialContext: ThemeContextType = {
   setTheme: () => null,
@@ -33,22 +33,14 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [])
 
+  /**
+   * The storefront is light-only (see `InitTheme`). This effect used to restore
+   * a stored or OS-implied preference on mount, which re-applied dark after the
+   * inline script had pinned light — leaving unpainted sections black.
+   */
   useEffect(() => {
-    let themeToSet: Theme = defaultTheme
-    const preference = window.localStorage.getItem(themeLocalStorageKey)
-
-    if (themeIsValid(preference)) {
-      themeToSet = preference
-    } else {
-      const implicitPreference = getImplicitPreference()
-
-      if (implicitPreference) {
-        themeToSet = implicitPreference
-      }
-    }
-
-    document.documentElement.setAttribute('data-theme', themeToSet)
-    setThemeState(themeToSet)
+    document.documentElement.setAttribute('data-theme', defaultTheme)
+    setThemeState(defaultTheme)
   }, [])
 
   return <ThemeContext value={{ setTheme, theme }}>{children}</ThemeContext>

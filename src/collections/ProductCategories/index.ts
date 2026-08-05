@@ -59,6 +59,7 @@ export const ProductCategories: CollectionConfig<'product-categories'> = {
         { label: 'Sky', value: 'sky' },
         { label: 'Mint', value: 'mint' },
         { label: 'Pink', value: 'pink' },
+        { label: 'Rose', value: 'rose' },
       ],
       admin: {
         description: 'Background colour of the category tile.',

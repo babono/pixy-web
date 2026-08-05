@@ -48,33 +48,35 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
   return (
     <header className="fixed inset-x-0 top-0 z-50">
       <div className="container py-3">
-        <div className="flex h-14 items-center gap-3 rounded-full bg-white/95 px-4 shadow-[0_2px_16px_rgba(181,105,127,0.12)] backdrop-blur-sm md:px-6">
-          <button
-            aria-expanded={menuOpen}
-            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-            className="flex size-9 items-center justify-center rounded-full text-pixy-rose transition-colors hover:bg-pixy-blush-50 lg:hidden"
-            onClick={() => setMenuOpen((open) => !open)}
-            type="button"
-          >
-            {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
-          </button>
+        <div className="relative flex h-14 items-center justify-between gap-3 rounded-full bg-white/95 px-4 shadow-[0_2px_16px_rgba(181,105,127,0.12)] backdrop-blur-sm md:px-6">
+          <div className="flex items-center gap-3">
+            <button
+              aria-expanded={menuOpen}
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              className="flex size-9 items-center justify-center rounded-full text-pixy-rose transition-colors hover:bg-pixy-blush-50 lg:hidden"
+              onClick={() => setMenuOpen((open) => !open)}
+              type="button"
+            >
+              {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+            </button>
 
-          <Link
-            aria-label="PIXY home"
-            className="flex shrink-0 items-center text-pixy-rose"
-            href="/"
-          >
-            {typeof logo === 'object' && logo !== null ? (
-              <span className="relative block h-6 w-20">
-                <Media fill imgClassName="object-contain object-left" resource={logo} size="80px" />
-              </span>
-            ) : (
-              <Wordmark className="text-2xl" />
-            )}
-          </Link>
+            <Link
+              aria-label="PIXY home"
+              className="flex shrink-0 items-center text-pixy-rose"
+              href="/"
+            >
+              {typeof logo === 'object' && logo !== null ? (
+                <span className="relative block h-6 w-20">
+                  <Media fill imgClassName="object-contain object-left" resource={logo} size="80px" />
+                </span>
+              ) : (
+                <Wordmark className="text-2xl" />
+              )}
+            </Link>
+          </div>
 
-          {/* Nav collapses out of the way while the search field is open */}
-          <div className={cn('mx-auto', searchOpen && 'lg:hidden')}>
+          {/* Centered navigation across the entire header bar */}
+          <div className={cn('absolute left-1/2 -translate-x-1/2 hidden lg:block', searchOpen && 'lg:hidden')}>
             <HeaderNav data={data} />
           </div>
 

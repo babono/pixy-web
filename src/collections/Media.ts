@@ -30,6 +30,17 @@ export const Media: CollectionConfig = {
       //required: true,
     },
     {
+      name: 'cloudinaryVersion',
+      type: 'number',
+      admin: { hidden: true },
+      /**
+       * Cloudinary's versionless delivery URLs are not reliable immediately
+       * after a public ID has been reused or invalidated — they 404 until the
+       * CDN catches up. Persisting the version returned at upload lets
+       * `generateURL` emit the `v<version>` segment Cloudinary itself returns.
+       */
+    },
+    {
       name: 'caption',
       type: 'richText',
       editor: lexicalEditor({

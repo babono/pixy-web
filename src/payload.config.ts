@@ -4,6 +4,7 @@ import path from 'path'
 import { buildConfig, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 
+import { AsSeenOn } from './collections/AsSeenOn'
 import { Categories } from './collections/Categories'
 import { Marketplaces } from './collections/Marketplaces'
 import { Media } from './collections/Media'
@@ -68,6 +69,7 @@ export default buildConfig({
     Posts,
     Products,
     ProductCategories,
+    AsSeenOn,
     Marketplaces,
     Media,
     Categories,

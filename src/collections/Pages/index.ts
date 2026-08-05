@@ -4,6 +4,7 @@ import { authenticated } from '../../access/authenticated'
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
 import { Archive } from '../../blocks/ArchiveBlock/config'
 import { ArticleGrid } from '../../blocks/ArticleGrid/config'
+import { AsSeenOnFeed } from '../../blocks/AsSeenOnFeed/config'
 import { BrandValues } from '../../blocks/BrandValues/config'
 import { CallToAction } from '../../blocks/CallToAction/config'
 import { CategoryGrid } from '../../blocks/CategoryGrid/config'
@@ -86,6 +87,7 @@ export const Pages: CollectionConfig<'pages'> = {
                 CategoryGrid,
                 ProductGrid,
                 MarketplaceLinks,
+                AsSeenOnFeed,
                 ArticleGrid,
                 SocialStrip,
                 // Generic template blocks

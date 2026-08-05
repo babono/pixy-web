@@ -1,8 +1,14 @@
 import Script from 'next/script'
 import React from 'react'
 
-import { defaultTheme, themeLocalStorageKey } from '../ThemeSelector/types'
+import { defaultTheme } from '../ThemeSelector/types'
 
+/**
+ * The PIXY design is light-only — there is no dark palette in the Figma, and
+ * the storefront paints its own backgrounds on every band. Honouring the OS
+ * `prefers-color-scheme` therefore turned unpainted sections black, so the
+ * theme is pinned to light rather than following the system or localStorage.
+ */
 export const InitTheme: React.FC = () => {
   return (
     // eslint-disable-next-line @next/next/no-before-interactive-script-outside-document
@@ -10,36 +16,7 @@ export const InitTheme: React.FC = () => {
       dangerouslySetInnerHTML={{
         __html: `
   (function () {
-    function getImplicitPreference() {
-      var mediaQuery = '(prefers-color-scheme: dark)'
-      var mql = window.matchMedia(mediaQuery)
-      var hasImplicitPreference = typeof mql.matches === 'boolean'
-
-      if (hasImplicitPreference) {
-        return mql.matches ? 'dark' : 'light'
-      }
-
-      return null
-    }
-
-    function themeIsValid(theme) {
-      return theme === 'light' || theme === 'dark'
-    }
-
-    var themeToSet = '${defaultTheme}'
-    var preference = window.localStorage.getItem('${themeLocalStorageKey}')
-
-    if (themeIsValid(preference)) {
-      themeToSet = preference
-    } else {
-      var implicitPreference = getImplicitPreference()
-
-      if (implicitPreference) {
-        themeToSet = implicitPreference
-      }
-    }
-
-    document.documentElement.setAttribute('data-theme', themeToSet)
+    document.documentElement.setAttribute('data-theme', '${defaultTheme}')
   })();
   `,
       }}

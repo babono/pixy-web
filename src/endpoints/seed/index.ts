@@ -8,19 +8,23 @@ import type { Marketplace, Media, Product, ProductCategory } from '@/payload-typ
 import { contactForm as contactFormData } from './contact-form'
 import { contact as contactPageData } from './contact-page'
 import {
-  categoryTile,
-  editorialImage,
-  heroBanner,
-  marketplaceLogo,
-  packshot,
-  palettes,
-  valueIcon,
-} from './pixy/images'
+  asset,
+  categoryAssets,
+  heroAssets,
+  logoAssets,
+  marketplaceAssets,
+  postAssets,
+  productAssets,
+  valueAssets,
+} from './pixy/assets'
+import { packshot, palettes } from './pixy/images'
 import { richText } from './pixy/lexical'
+import { seedAsSeenOnItems } from './pixy/asSeenOn'
 import { seedPosts } from './pixy/posts'
 import { seedProducts } from './pixy/products'
 
 const collections: CollectionSlug[] = [
+  'as-seen-on',
   'categories',
   'media',
   'pages',
@@ -122,40 +126,27 @@ export const seed = async ({
   // keeps repeated seeds from piling up orphans. Only ever holds seeded uploads.
   await clearUploadDir(payload)
 
-  payload.logger.info(`— Generating placeholder artwork...`)
+  payload.logger.info(`— Loading Figma artwork...`)
 
   const [heroFiles, categoryFiles, valueFiles, marketplaceFiles, editorialFiles] =
     await Promise.all([
-      Promise.all([
-        heroBanner({ name: 'pixy-hero-1', palette: palettes.lavender }),
-        heroBanner({ name: 'pixy-hero-2', palette: palettes.rose }),
-        heroBanner({ name: 'pixy-hero-3', palette: palettes.sky }),
-      ]),
+      Promise.all(heroAssets.map((slide) => asset(slide.file, slide.name))),
       Promise.all(
         productCategories.map((category) =>
-          categoryTile({
-            name: `pixy-category-${category.slug}`,
-            palette: category.art.palette,
-            shape: category.art.shape,
-          }),
+          asset(categoryAssets[category.slug], `pixy-category-${category.slug}`),
         ),
       ),
-      Promise.all(
-        brandValues.map((value, index) =>
-          valueIcon({ label: value.badge, name: `pixy-value-${index + 1}` }),
-        ),
-      ),
+      Promise.all(valueAssets.map((file, index) => asset(file, `pixy-value-${index + 1}`))),
       Promise.all(
         marketplaces.map((marketplace) =>
-          marketplaceLogo({
-            color: marketplace.color,
-            initial: marketplace.initial,
-            name: `pixy-marketplace-${marketplace.name.toLowerCase().replace(/\s+/g, '-')}`,
-          }),
+          asset(
+            marketplaceAssets[marketplace.name],
+            `pixy-marketplace-${marketplace.name.toLowerCase().replace(/\s+/g, '-')}`,
+          ),
         ),
       ),
       Promise.all(
-        seedPosts.map((post) => editorialImage({ name: `pixy-post-${post.slug}`, palette: post.palette })),
+        seedPosts.map((post) => asset(postAssets[post.slug], `pixy-post-${post.slug}`)),
       ),
     ])
 
@@ -163,11 +154,11 @@ export const seed = async ({
 
   // Every write shares `req` and therefore one transaction, and MongoDB forbids
   // concurrent operations on a single session — so uploads run one at a time.
-  const createMedia = (file: Awaited<ReturnType<typeof heroBanner>>, alt: string) =>
+  const createMedia = (file: Awaited<ReturnType<typeof asset>>, alt: string) =>
     payload.create({ collection: 'media', data: { alt }, file, req })
 
   const createMediaBatch = async (
-    files: Awaited<ReturnType<typeof heroBanner>>[],
+    files: Awaited<ReturnType<typeof asset>>[],
     alt: (index: number) => string,
   ): Promise<Media[]> => {
     const docs: Media[] = []
@@ -191,6 +182,15 @@ export const seed = async ({
     (index) => `${marketplaces[index].name} logo`,
   )
   const editorialMedia = await createMediaBatch(editorialFiles, (index) => seedPosts[index].title)
+
+  const logoRoseMedia = await createMedia(
+    await asset(logoAssets.rose, 'pixy-logo-rose'),
+    'PIXY',
+  )
+  const logoWhiteMedia = await createMedia(
+    await asset(logoAssets.white, 'pixy-logo-white'),
+    'PIXY',
+  )
 
   payload.logger.info(`— Seeding shop taxonomy...`)
 
@@ -249,18 +249,30 @@ export const seed = async ({
 
   const productDocs: Record<string, Product> = {}
   for (const product of seedProducts) {
-    // Packshots are per-product, so they're generated and uploaded inline
-    const files = await Promise.all(
-      product.art.palettes.map((palette, index) =>
+    // Only the two products the Figma art-directs have a real key visual. It
+    // leads the gallery, with the generated packshots kept behind it so every
+    // product still has the multi-image set the design's thumbnail row needs.
+    const realArt = productAssets[product.slug]
+
+    // The design's thumbnail row is 4 wide, so the real visual displaces one
+    // generated packshot rather than adding a fifth that would wrap.
+    const palettes = realArt ? product.art.palettes.slice(0, -1) : product.art.palettes
+
+    const generated = await Promise.all(
+      palettes.map((palette, index) =>
         packshot({
           bandLabel: product.art.bandLabel,
-          name: `${product.slug}-${index + 1}`,
+          name: `${product.slug}-${index + (realArt ? 2 : 1)}`,
           palette,
           shape: product.art.shape,
           variantLabel: product.art.variantLabel,
         }),
       ),
     )
+
+    const files = realArt
+      ? [await asset(realArt, `${product.slug}-1`), ...generated]
+      : generated
 
     const images: Media[] = []
     for (const [index, file] of files.entries()) {
@@ -275,7 +287,7 @@ export const seed = async ({
         title: product.title,
         slug: product.slug,
         _status: 'published',
-        category: categoryDocs[product.categorySlug].id,
+        category: [categoryDocs[product.categorySlug].id],
         price: product.price,
         featured: product.featured,
         shortDescription: product.shortDescription,
@@ -340,6 +352,37 @@ export const seed = async ({
             image: editorialMedia[index].id,
           },
           publishedAt: new Date().toISOString(),
+        },
+        req,
+      }),
+    )
+  }
+
+  payload.logger.info(`— Seeding As Seen On feed items...`)
+
+  const asSeenOnDocs = []
+  for (const [index, item] of seedAsSeenOnItems.entries()) {
+    const thumbMedia = editorialMedia[index % editorialMedia.length]
+    const linkedProd = item.productSlug ? productDocs[item.productSlug] : null
+
+    asSeenOnDocs.push(
+      await payload.create({
+        collection: 'as-seen-on',
+        depth: 0,
+        context: { disableRevalidate: true },
+        data: {
+          title: item.title,
+          thumbnail: thumbMedia.id,
+          videoUrl: item.videoUrl,
+          tiktokUrl: item.tiktokUrl,
+          sortOrder: item.sortOrder,
+          product: linkedProd ? linkedProd.id : undefined,
+          customProduct: {
+            name: item.customName,
+            price: item.customPrice,
+            category: item.customCategory,
+            url: item.customUrl || (linkedProd ? `/products/${linkedProd.slug}` : '/products'),
+          },
         },
         req,
       }),
@@ -439,11 +482,10 @@ export const seed = async ({
           marketplaces: marketplaceDocs.map((marketplace) => marketplace.id),
         },
         {
-          blockType: 'articleGrid',
-          heading: 'Tips & Reviews',
+          blockType: 'asSeenOnFeed',
+          heading: 'AS SEEN ON',
           source: 'latest',
-          limit: 4,
-          cta: { enabled: true, link: { type: 'custom', url: '/posts', label: 'See More' } },
+          limit: 10,
         },
         {
           blockType: 'socialStrip',
@@ -468,7 +510,8 @@ export const seed = async ({
   await payload.updateGlobal({
     slug: 'header',
     data: {
-      searchPlaceholder: 'Search products, tips and more',
+      logo: logoRoseMedia.id,
+      searchPlaceholder: 'Search products, beauty and more',
       navItems: [
         {
           link: { type: 'custom', url: '/products', label: 'Products' },
@@ -484,7 +527,6 @@ export const seed = async ({
           })),
         },
         { link: { type: 'custom', url: '/products', label: 'Offers' } },
-        { link: { type: 'custom', url: '/posts', label: 'Tips & Reviews' } },
         { link: { type: 'custom', url: '/posts', label: 'News & Updates' } },
         {
           link: {
@@ -501,6 +543,7 @@ export const seed = async ({
   await payload.updateGlobal({
     slug: 'footer',
     data: {
+      logo: logoWhiteMedia.id,
       tagline:
         'Real beauty, rooted in quality. Japanese beauty expertise for your authentic, everyday glow.',
       columns: [
@@ -539,25 +582,18 @@ export const seed = async ({
               },
             },
             { link: { type: 'custom' as const, url: '/products', label: 'Promos & Offers' } },
-            {
-              link: {
-                type: 'reference' as const,
-                reference: { relationTo: 'posts' as const, value: postDocs[0].id },
-                label: 'Tips & Reviews',
-              },
-            },
             { link: { type: 'custom' as const, url: '/posts', label: 'News & Updates' } },
             { link: { type: 'custom' as const, url: '/search', label: 'FAQ' } },
           ],
         },
       ],
       socialLinks: [
-        { platform: 'youtube', url: 'https://www.youtube.com/' },
-        { platform: 'facebook', url: 'https://www.facebook.com/' },
-        { platform: 'x', url: 'https://x.com/' },
-        { platform: 'tiktok', url: 'https://www.tiktok.com/' },
-        { platform: 'instagram', url: 'https://www.instagram.com/' },
-        { platform: 'whatsapp', url: 'https://wa.me/' },
+        { platform: 'youtube', url: 'https://www.youtube.com/user/PixyIndonesia/videos' },
+        { platform: 'facebook', url: 'https://www.facebook.com/PIXYIndonesiaOfficial' },
+        { platform: 'x', url: 'https://www.twitter.com/PIXYIndonesia' },
+        { platform: 'tiktok', url: 'https://www.tiktok.com/@pixycosmetics_id' },
+        { platform: 'instagram', url: 'https://www.instagram.com/pixycosmetics' },
+        { platform: 'whatsapp', url: 'http://wa.me/6281122301000' },
       ],
       localeLinks: [
         { link: { type: 'custom', url: '/', label: 'English' } },

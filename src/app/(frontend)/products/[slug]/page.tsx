@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 
 import { CheckCircle2 } from 'lucide-react'
 import configPromise from '@payload-config'
+import Link from 'next/link'
 import { draftMode } from 'next/headers'
 import { getPayload } from 'payload'
 import React, { cache } from 'react'
@@ -47,9 +48,11 @@ export default async function ProductPage({ params: paramsPromise }: Args) {
 
   const product = await queryProductBySlug({ slug: decodedSlug })
 
-  if (!product) return <PayloadRedirects url={url} />
-
-  const category = typeof product.category === 'object' ? product.category : null
+  const firstCategory = Array.isArray(product.category) ? product.category[0] : product.category
+  const category =
+    typeof firstCategory === 'object' && firstCategory !== null
+      ? (firstCategory as ProductCategory)
+      : null
   const images = (product.images ?? []).filter(
     (image): image is MediaType => typeof image === 'object' && image !== null,
   )
@@ -72,39 +75,42 @@ export default async function ProductPage({ params: paramsPromise }: Args) {
           ]}
         />
 
-        <div className="mt-6 grid gap-8 lg:mt-10 lg:grid-cols-2 lg:gap-14">
+        {/* Figma: two equal 473.5px columns with a 56px gutter */}
+        <div className="mt-8 grid gap-8 lg:grid-cols-2 lg:gap-14">
           <ProductGallery images={images} title={product.title} />
 
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-5">
             {category && (
-              <span className="pixy-eyebrow text-[11px] text-pixy-rose">{category.title}</span>
+              <span className="text-xs leading-[18px] font-medium tracking-[0.5px] text-pixy-rose uppercase">
+                {category.title}
+              </span>
             )}
 
-            <h1 className="mt-3 text-2xl leading-tight font-medium text-pixy-ink md:text-3xl">
+            <h1 className="text-2xl leading-tight font-medium text-pixy-ink md:text-[32px] md:leading-10">
               {product.title}
             </h1>
 
-            <p className="mt-4 text-2xl font-semibold text-pixy-crimson md:text-3xl">
+            <p className="text-2xl font-bold text-pixy-rose md:text-[30px] md:leading-[45px]">
               {formatPrice(product.price)}
             </p>
 
             {product.shortDescription && (
-              <p className="mt-4 max-w-lg text-sm leading-relaxed text-pixy-ink/80 md:text-base">
+              <p className="text-sm text-pixy-muted md:text-[15px] md:leading-[26px]">
                 {product.shortDescription}
               </p>
             )}
 
             {/* Hidden on mobile — the same buttons live in the sticky bottom bar */}
-            <ProductActions actions={product.actions} className="mt-7 hidden md:flex" />
+            <ProductActions actions={product.actions} className="mt-2 hidden md:flex" />
 
             {Boolean(product.highlights?.length) && (
-              <ul className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-pixy-blush-200 pt-6">
+              <ul className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3 border-t border-pixy-blush-200 pt-6">
                 {product.highlights!.map((highlight, index) => (
                   <li
-                    className="flex items-center gap-2 text-xs text-pixy-ink/80 md:text-sm"
+                    className="flex items-center gap-2 text-xs text-pixy-muted md:text-sm"
                     key={highlight.id ?? index}
                   >
-                    <CheckCircle2 className="size-4 shrink-0 text-pixy-rose" />
+                    <CheckCircle2 className="size-[18px] shrink-0 text-pixy-rose" />
                     {highlight.label}
                   </li>
                 ))}
@@ -117,40 +123,64 @@ export default async function ProductPage({ params: paramsPromise }: Args) {
       <ProductReviews reviews={product.reviews} />
 
       {product.description && (
-        <section className="w-full border-b border-pixy-blush-200 bg-white py-10 md:py-14">
+        <section className="w-full bg-white py-8">
           <div className="container">
-            <h2 className="pixy-eyebrow text-xs text-pixy-ink md:text-sm">About Product</h2>
+            <h2 className="text-base leading-[18px] font-medium tracking-[0.8px] text-pixy-ink uppercase">
+              About Product
+            </h2>
+            {/* `enableProse` centres and narrows the copy; the design runs it
+                full width beneath the heading. */}
             <RichText
-              className="mt-5 max-w-3xl text-sm text-pixy-ink/80 md:text-base"
+              className="mt-4 text-sm leading-[22px] text-pixy-muted"
               data={product.description}
               enableGutter={false}
+              enableProse={false}
             />
           </div>
         </section>
       )}
 
+      {/* Full-bleed 8px band, not a hairline rule */}
+      <div aria-hidden="true" className="h-2 w-full bg-pixy-surface" />
+
       {product.howToUse && (
-        <section className="w-full border-b border-pixy-blush-200 bg-white py-10 md:py-14">
-          <div className="container">
-            <h2 className="pixy-eyebrow text-xs text-pixy-ink md:text-sm">How To Use</h2>
-            <RichText
-              className="mt-5 max-w-3xl text-sm text-pixy-ink/80 md:text-base"
-              data={product.howToUse}
-              enableGutter={false}
-            />
-          </div>
-        </section>
+        <>
+          <section className="w-full bg-white py-8">
+            <div className="container">
+              <h2 className="text-base leading-[18px] font-medium tracking-[0.8px] text-pixy-ink uppercase">
+                How To Use
+              </h2>
+              <RichText
+                className="mt-4 text-sm leading-[22px] text-pixy-muted"
+                data={product.howToUse}
+                enableGutter={false}
+                enableProse={false}
+              />
+            </div>
+          </section>
+
+          <div aria-hidden="true" className="h-2 w-full bg-pixy-surface" />
+        </>
       )}
 
       {Boolean(related.length) && (
-        <section className="w-full bg-white py-12 md:py-16">
+        <section className="w-full bg-white py-8">
           <div className="container">
             <SectionHeading>Similar Products</SectionHeading>
 
-            <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6">
+            <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6">
               {related.map((item) => (
                 <ProductCard key={item.id} product={item} />
               ))}
+            </div>
+
+            <div className="mt-8 flex justify-center">
+              <Link
+                className="pixy-button-label inline-flex h-12 w-[300px] items-center justify-center rounded-full bg-pixy-rose text-white transition-colors hover:bg-pixy-rose-dark"
+                href="/products"
+              >
+                See More
+              </Link>
             </div>
           </div>
         </section>
@@ -204,10 +234,11 @@ const queryRelatedProducts = async (product: Product): Promise<Product[]> => {
 
   if (picked.length) return picked.slice(0, 4)
 
+  const firstCat = Array.isArray(product.category) ? product.category[0] : product.category
   const categoryID =
-    typeof product.category === 'object'
-      ? (product.category as ProductCategory).id
-      : product.category
+    typeof firstCat === 'object' && firstCat !== null
+      ? (firstCat as ProductCategory).id
+      : firstCat
 
   if (!categoryID) return []
 

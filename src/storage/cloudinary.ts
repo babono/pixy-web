@@ -9,10 +9,14 @@ import { v2 as cloudinary } from 'cloudinary'
  * UploadThing but not Cloudinary, so this implements the same
  * `GeneratedAdapter` contract against the official Cloudinary SDK.
  *
- * Files are stored at `<folder>/<prefix?>/<filename>` and the `public_id`
- * deliberately keeps the file extension. That makes upload, delete and URL
- * generation symmetric — no extension bookkeeping, and Payload's generated
- * image sizes (`name-300x200.webp`) round-trip unchanged.
+ * Files are stored at `<folder>/<prefix?>/<filename>`.
+ *
+ * Extensions need care. For `image` and `video` resources Cloudinary treats the
+ * extension as a *delivery format* appended to the public ID, so a public ID
+ * that already ends in `.webp` is served at `name.webp.webp`. Those types
+ * therefore store the ID stem and pass the extension as `format`. `raw` behaves
+ * the opposite way — the public ID is the whole filename and nothing is
+ * appended — so raw keeps its extension.
  */
 
 export type CloudinaryAdapterArgs = {
@@ -61,51 +65,81 @@ export const cloudinaryStorageAdapter =
      * add. Uploads use `overwrite: true` and deletes invalidate the CDN, so
      * there is no version to pin and the placeholder only adds noise.
      */
-    const urlFor = (publicId: string, mimeType?: string | null) =>
-      cloudinary.url(publicId, {
-        resource_type: resourceTypeFor(mimeType),
-        secure: true,
-        force_version: false,
-      })
+    /**
+     * Splits `name.webp` into the public-ID stem and delivery format, except
+     * for `raw` where the extension is part of the ID itself.
+     */
+    const identify = (filename: string, mimeType?: string | null) => {
+      const resourceType = resourceTypeFor(mimeType)
+      const match = filename.match(/^(.*)\.([A-Za-z0-9]+)$/)
+
+      if (resourceType === 'raw' || !match) {
+        return { format: undefined, resourceType, stem: filename }
+      }
+
+      return { format: match[2], resourceType, stem: match[1] }
+    }
 
     const publicIdFor = (filename: string, docPrefix?: string) =>
       joinPath(folder, docPrefix ?? prefix, filename)
+
+    const urlFor = (
+      filename: string,
+      docPrefix?: string,
+      mimeType?: string | null,
+      version?: number | null,
+    ) => {
+      const { format, resourceType, stem } = identify(filename, mimeType)
+
+      return cloudinary.url(publicIdFor(stem, docPrefix), {
+        format,
+        resource_type: resourceType,
+        secure: true,
+        // Without a known version, fall back to a versionless URL rather than
+        // emitting the SDK's `v1` placeholder, which never resolves.
+        force_version: false,
+        ...(version ? { version } : {}),
+      })
+    }
 
     return {
       name: 'cloudinary',
 
       handleUpload: async ({ data, file }) => {
-        const publicId = publicIdFor(file.filename, data?.prefix)
+        const { resourceType, stem } = identify(file.filename, file.mimeType)
 
-        await new Promise<void>((resolve, reject) => {
+        const uploaded = await new Promise<{ version?: number }>((resolve, reject) => {
           const stream = cloudinary.uploader.upload_stream(
             {
-              public_id: publicId,
-              resource_type: resourceTypeFor(file.mimeType),
+              public_id: publicIdFor(stem, data?.prefix),
+              resource_type: resourceType,
               // The public_id is fully computed above, so none of Cloudinary's
               // own naming behaviour should interfere with it.
               use_filename: false,
               unique_filename: false,
               overwrite: true,
             },
-            (error) => (error ? reject(error) : resolve()),
+            (error, result) => (error ? reject(error) : resolve(result ?? {})),
           )
 
           stream.end(file.buffer)
         })
 
-        return data
+        // Persisted on the doc so generateURL can address this exact version
+        return { ...data, cloudinaryVersion: uploaded.version }
       },
 
       handleDelete: async ({ doc, filename }) => {
-        await cloudinary.uploader.destroy(publicIdFor(filename, doc?.prefix), {
-          resource_type: resourceTypeFor(doc?.mimeType),
+        const { resourceType, stem } = identify(filename, doc?.mimeType)
+
+        await cloudinary.uploader.destroy(publicIdFor(stem, doc?.prefix), {
+          resource_type: resourceType,
           invalidate: true,
         })
       },
 
       generateURL: ({ data, filename, prefix: docPrefix }) =>
-        urlFor(publicIdFor(filename, docPrefix), data?.mimeType),
+        urlFor(filename, docPrefix, data?.mimeType, data?.cloudinaryVersion),
 
       /**
        * Used when `disablePayloadAccessControl` is off — Payload proxies the
@@ -114,9 +148,7 @@ export const cloudinaryStorageAdapter =
        */
       staticHandler: async (_req, { doc, params }) => {
         const mimeType = (doc as { mimeType?: string } | undefined)?.mimeType
-        const url = urlFor(joinPath(folder, params.prefix, params.filename), mimeType)
-
-        const response = await fetch(url)
+        const response = await fetch(urlFor(params.filename, params.prefix, mimeType))
 
         if (!response.ok || !response.body) {
           return new Response(null, { status: response.status || 404, statusText: 'Not Found' })

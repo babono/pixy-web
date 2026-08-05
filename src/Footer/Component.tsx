@@ -2,6 +2,7 @@ import Link from 'next/link'
 import React from 'react'
 
 import { CMSLink } from '@/components/Link'
+import { Media } from '@/components/Media'
 import { SocialIcon, socialLabel } from '@/components/pixy/SocialIcon'
 import { Wordmark } from '@/components/pixy/Wordmark'
 import { getCachedGlobal } from '@/utilities/getGlobals'
@@ -15,32 +16,44 @@ export async function Footer() {
   const legal = footerData?.legalLinks || []
 
   return (
-    <footer className="pixy-gradient-rose mt-auto text-white">
-      <div className="container py-14 md:py-16">
-        <div className="grid gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] md:gap-16">
-          <div>
+    <footer className="mt-auto bg-pixy-rose text-white">
+      {/* Figma: 64px block padding, a 320px brand column, then an 80px gutter */}
+      <div className="container py-16">
+        <div className="grid gap-10 md:grid-cols-[320px_minmax(0,1fr)] md:gap-20">
+          <div className="flex flex-col gap-5">
             <Link aria-label="PIXY home" className="inline-flex text-white" href="/">
-              <Wordmark className="text-4xl" />
+              {typeof footerData?.logo === 'object' && footerData.logo !== null ? (
+                <span className="relative block h-8 w-26">
+                  <Media
+                    fill
+                    imgClassName="object-contain object-left"
+                    resource={footerData.logo}
+                    size="104px"
+                  />
+                </span>
+              ) : (
+                <Wordmark className="text-4xl" />
+              )}
             </Link>
 
             {footerData?.tagline && (
-              <p className="mt-5 max-w-xs text-sm leading-relaxed text-white/85">
+              <p className="max-w-[280px] text-[13px] leading-5 text-pixy-blush-200">
                 {footerData.tagline}
               </p>
             )}
 
             {Boolean(socials.length) && (
-              <ul className="mt-6 flex flex-wrap items-center gap-5">
+              <ul className="flex flex-wrap items-center gap-3">
                 {socials.map((social, index) => (
                   <li key={social.id ?? index}>
                     <a
                       aria-label={socialLabel(social.platform)}
-                      className="block text-white transition-opacity hover:opacity-70"
+                      className="flex size-8 items-center justify-center text-white transition-opacity hover:opacity-70"
                       href={social.url}
                       rel="noopener noreferrer"
                       target="_blank"
                     >
-                      <SocialIcon className="size-5" platform={social.platform} />
+                      <SocialIcon className="size-6" platform={social.platform} />
                     </a>
                   </li>
                 ))}
@@ -49,16 +62,18 @@ export async function Footer() {
           </div>
 
           {Boolean(columns.length) && (
-            <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 md:gap-10">
+            <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
               {columns.map((column, index) => (
-                <div key={column.id ?? index}>
-                  <h2 className="pixy-eyebrow text-[10px] text-white/70">{column.title}</h2>
-                  <ul className="mt-4 flex flex-col gap-2.5">
+                <div className="flex flex-col gap-3" key={column.id ?? index}>
+                  <h2 className="text-[11px] leading-[16.5px] font-medium tracking-[0.5px] text-pixy-pink uppercase">
+                    {column.title}
+                  </h2>
+                  <ul className="flex flex-col gap-3">
                     {(column.navItems ?? []).map((item, itemIndex) => (
                       <li key={item.id ?? itemIndex}>
                         <CMSLink
                           {...item.link}
-                          className="text-sm text-white/95 transition-opacity hover:opacity-70"
+                          className="text-sm leading-[21px] text-white/90 transition-opacity hover:opacity-70"
                         />
                       </li>
                     ))}
@@ -69,12 +84,20 @@ export async function Footer() {
           )}
         </div>
 
-        <div className="mt-12 flex flex-col gap-4 border-t border-white/25 pt-6 text-xs text-white/80 md:flex-row md:items-center md:justify-between">
-          {Boolean(locales.length) && (
-            <ul className="flex flex-wrap items-center gap-x-3 gap-y-2 md:order-2">
-              {locales.map((item, index) => (
+        {/* Locale and legal read as one continuous bulleted run in the design,
+            so they are concatenated rather than kept as two separate lists. */}
+        <div className="mt-10 flex flex-col gap-4 border-t border-pixy-pink/50 pt-10 text-[13px] leading-[19.5px] text-white/80 md:flex-row md:items-center md:justify-between">
+          {footerData?.copyright && <p>{footerData.copyright}</p>}
+
+          {Boolean(locales.length || legal.length) && (
+            <ul className="flex flex-wrap items-center gap-x-2.5 gap-y-2">
+              {[...locales, ...legal].map((item, index) => (
                 <React.Fragment key={item.id ?? index}>
-                  {index > 0 && <li aria-hidden="true">•</li>}
+                  {index > 0 && (
+                    <li aria-hidden="true" className="text-pixy-pink">
+                      •
+                    </li>
+                  )}
                   <li>
                     <CMSLink {...item.link} className="transition-opacity hover:opacity-70" />
                   </li>
@@ -82,21 +105,6 @@ export async function Footer() {
               ))}
             </ul>
           )}
-
-          {Boolean(legal.length) && (
-            <ul className="flex flex-wrap items-center gap-x-3 gap-y-2 md:order-3">
-              {legal.map((item, index) => (
-                <React.Fragment key={item.id ?? index}>
-                  {index > 0 && <li aria-hidden="true">•</li>}
-                  <li>
-                    <CMSLink {...item.link} className="transition-opacity hover:opacity-70" />
-                  </li>
-                </React.Fragment>
-              ))}
-            </ul>
-          )}
-
-          {footerData?.copyright && <p className="md:order-1">{footerData.copyright}</p>}
         </div>
       </div>
     </footer>

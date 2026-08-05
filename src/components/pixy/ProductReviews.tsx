@@ -11,7 +11,7 @@ export const ProductReviews: React.FC<{ reviews: Product['reviews'] }> = ({ revi
   if (!reviews?.length || average === null) return null
 
   return (
-    <section className="w-full bg-pixy-cream py-10 md:py-14">
+    <section className="w-full bg-pixy-surface py-10 md:py-14">
       <div className="container">
         <div className="flex items-center gap-4">
           <h2 className="pixy-eyebrow text-xs text-pixy-muted md:text-sm">Reviews</h2>

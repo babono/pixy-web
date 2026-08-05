@@ -44,29 +44,37 @@
   --breakpoint-xl: 80rem;
   --breakpoint-2xl: 86rem;
   --font-mono: var(--font-geist-mono);
-  --font-sans: var(--font-geist-sans);
-  /* Geometric display face used for the PIXY wordmark, section headings and buttons */
-  --font-display: var(--font-jost), var(--font-geist-sans), sans-serif;
+  /* Body copy, labels, buttons, nav, prices — everything that is not a heading */
+  --font-sans: var(--font-inter), var(--font-geist-sans), sans-serif;
+  /* Reserved for uppercase headings and the hero headline. Never body copy. */
+  --font-display: var(--font-syncopate), var(--font-geist-sans), sans-serif;
 
-  /* --- PIXY brand palette ------------------------------------------------ */
-  --color-pixy-rose: #b5697f;
-  --color-pixy-rose-dark: #9c5568;
-  --color-pixy-rose-light: #c98da0;
-  --color-pixy-crimson: #b54a63;
-  --color-pixy-heading: #a85b6e;
-  --color-pixy-ink: #2b2b2b;
+  /* --- PIXY brand palette ------------------------------------------------
+   * Sampled from the Figma file (`npm run figma:pull`), ordered by how often
+   * each value actually appears in the design rather than by intuition.
+   * ---------------------------------------------------------------------- */
+  --color-pixy-rose: #b46b7a; /* buttons, footer, social chips — the brand colour */
+  --color-pixy-heading: #884f47; /* every Syncopate section heading */
+  --color-pixy-pink: #e8a2b2; /* footer labels + the deep end of the blush ramp */
+  --color-pixy-gold: #f2c94c; /* review stars, and only review stars */
+  --color-pixy-teal: #34a798;
+
+  --color-pixy-ink: #252525;
   --color-pixy-muted: #6f6f6f;
-  --color-pixy-blush-50: #fdf3f7;
-  --color-pixy-blush-100: #fbe6ed;
-  --color-pixy-blush-200: #f7d2de;
-  --color-pixy-blush-300: #f2bccd;
-  --color-pixy-cream: #faf7f5;
+  --color-pixy-grey: #a3a3a3;
+  --color-pixy-grey-light: #bbbbbb; /* inactive carousel dots */
+  --color-pixy-chevron: #898989;
 
-  /* Category tile tints, mirrored by the `tint` select on product categories */
-  --color-pixy-tile-lavender: #d3c4ec;
-  --color-pixy-tile-sky: #a9d6ee;
-  --color-pixy-tile-mint: #a9e0d3;
-  --color-pixy-tile-pink: #f4c7d4;
+  --color-pixy-surface: #f6f6f6; /* the alternating off-white section band */
+  --color-pixy-blush-100: #f6dadf;
+  --color-pixy-blush-200: #f2d3d8;
+  --color-pixy-blush-300: #f2c6cf;
+
+  /* Derived, not sampled: the Figma has no hover or focus states, so these are
+   * extrapolated from the brand colour. Flagged so they are not mistaken for
+   * design decisions. */
+  --color-pixy-rose-dark: #9c5b68;
+  --color-pixy-blush-50: #fdf6f8;
 }
 
 @layer utilities {
@@ -253,56 +261,106 @@ html[data-theme='light'] {
  * ------------------------------------------------------------------------- */
 
 @layer components {
-  /* Wide, airy uppercase section titles ("REAL BEAUTY, ROOTED IN QUALITY") */
+  /**
+   * Section titles ("REAL BEAUTY, ROOTED IN QUALITY"). Syncopate is already a
+   * very wide face, so the design adds no extra tracking — the earlier build
+   * did, which is part of why headings read as too loose.
+   * Figma: 20px/22 mobile, 30px/38 desktop.
+   */
   .pixy-heading {
     font-family: var(--font-display);
-    font-weight: 300;
-    letter-spacing: 0.08em;
+    font-weight: 400;
     text-transform: uppercase;
-    line-height: 1.2;
+    font-size: 1.25rem;
+    line-height: 1.375rem;
     color: var(--color-pixy-heading);
   }
 
-  /* Small uppercase labels: breadcrumbs, eyebrows, tags */
-  .pixy-eyebrow {
-    font-family: var(--font-display);
-    font-weight: 500;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
+  /* The taller variant used for the lead statement. Figma: 26px/28 → 30px/38. */
+  .pixy-heading-lead {
+    font-size: 1.625rem;
+    line-height: 1.75rem;
   }
 
-  .pixy-wordmark {
+  /* Hero headline sits on photography, so it takes its colour from the parent */
+  .pixy-display {
     font-family: var(--font-display);
     font-weight: 400;
-    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-size: 2rem;
+    line-height: 2.25rem;
+  }
+
+  /* Button labels. Figma: Inter 14/16, w500, +0.7px tracking, uppercase. */
+  .pixy-button-label {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 0.875rem;
+    line-height: 1rem;
+    letter-spacing: 0.7px;
     text-transform: uppercase;
   }
 
-  /* Blush gradient used behind the brand-values and shop-now bands */
+  /* Footer column labels and small caps. Figma: Inter 10/12, w500, +0.5px. */
+  .pixy-eyebrow {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 0.625rem;
+    line-height: 0.75rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  /* The three-stop blush band behind the certifications and shop-now sections */
   .pixy-gradient-blush {
     background-image: linear-gradient(
-      180deg,
-      var(--color-pixy-blush-100) 0%,
-      var(--color-pixy-blush-300) 100%
+      135deg,
+      var(--color-pixy-blush-300) 0%,
+      var(--color-pixy-blush-100) 50%,
+      var(--color-pixy-pink) 100%
     );
   }
 
-  .pixy-gradient-blush-soft {
-    background-image: linear-gradient(
-      180deg,
-      var(--color-pixy-blush-50) 0%,
-      var(--color-pixy-blush-200) 100%
-    );
+  /* Scrim that lifts the hero headline off the photograph */
+  .pixy-gradient-scrim {
+    background-image: linear-gradient(180deg, #00000000 0%, #000000 100%);
   }
 
-  .pixy-gradient-rose {
-    background-image: linear-gradient(
-      180deg,
-      var(--color-pixy-rose-light) 0%,
-      var(--color-pixy-rose) 100%
-    );
+  /**
+   * Category tiles. Each is a two-stop 135° gradient, not a flat tint — the
+   * `tint` select on product categories maps onto these four.
+   */
+  .pixy-tile-lavender {
+    background-image: linear-gradient(135deg, #decde7 0%, #c5b4e2 100%);
+  }
+
+  .pixy-tile-sky {
+    background-image: linear-gradient(135deg, #c6dae8 0%, #9bcbeb 100%);
+  }
+
+  .pixy-tile-mint {
+    background-image: linear-gradient(135deg, #d6eae5 0%, #97dbce 100%);
+  }
+
+  .pixy-tile-pink {
+    background-image: linear-gradient(135deg, #f6dadf 0%, #f2c6cf 100%);
+  }
+
+  /* Added for the Series category, which the Figma's four tiles don't cover.
+     Derived from the brand rose rather than sampled. */
+  .pixy-tile-rose {
+    background-image: linear-gradient(135deg, #f2c6cf 0%, #e8a2b2 100%);
   }
 }
 
-/* Category tile tints are chosen in the CMS, so Tailwind cannot see them */
-@source inline("bg-pixy-tile-{lavender,sky,mint,pink}");
+@media (width >= 64rem) {
+  .pixy-heading,
+  .pixy-heading-lead {
+    font-size: 1.875rem;
+    line-height: 2.375rem;
+  }
+}
+
+/* The tile gradients above are hand-written component classes rather than
+ * generated utilities, so they survive the CMS choosing them at runtime
+ * without needing an `@source inline` hint. */

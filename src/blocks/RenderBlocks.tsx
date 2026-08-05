@@ -4,6 +4,7 @@ import type { Page } from '@/payload-types'
 
 import { ArchiveBlock } from '@/blocks/ArchiveBlock/Component'
 import { ArticleGridBlock } from '@/blocks/ArticleGrid/Component'
+import { AsSeenOnFeedBlock } from '@/blocks/AsSeenOnFeed/Component'
 import { BrandValuesBlock } from '@/blocks/BrandValues/Component'
 import { CallToActionBlock } from '@/blocks/CallToAction/Component'
 import { CategoryGridBlock } from '@/blocks/CategoryGrid/Component'
@@ -18,6 +19,7 @@ import { SocialStripBlock } from '@/blocks/SocialStrip/Component'
 const blockComponents = {
   archive: ArchiveBlock,
   articleGrid: ArticleGridBlock,
+  asSeenOnFeed: AsSeenOnFeedBlock,
   brandValues: BrandValuesBlock,
   categoryGrid: CategoryGridBlock,
   content: ContentBlock,
@@ -37,6 +39,7 @@ const blockComponents = {
  */
 const bleedBlocks = new Set([
   'articleGrid',
+  'asSeenOnFeed',
   'brandValues',
   'categoryGrid',
   'heroCarousel',

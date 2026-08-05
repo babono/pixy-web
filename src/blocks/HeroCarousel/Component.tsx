@@ -44,7 +44,7 @@ export const HeroCarouselBlock: React.FC<HeroCarouselBlockProps> = ({
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      <div className="relative h-[520px] w-full md:h-[620px]">
+      <div className="relative h-[520px] w-full md:h-[680px]">
         {slides.map((slide, index) => (
           <div
             aria-hidden={index !== active}
@@ -69,7 +69,7 @@ export const HeroCarouselBlock: React.FC<HeroCarouselBlockProps> = ({
 
             <div className="container relative flex h-full flex-col justify-end pb-24 md:justify-center md:pb-0">
               <div className="max-w-xl text-white">
-                <h1 className="font-display text-4xl font-medium tracking-[0.04em] whitespace-pre-line uppercase md:text-5xl">
+                <h1 className="pixy-display whitespace-pre-line md:text-5xl md:leading-[3.5rem]">
                   {slide.headline}
                 </h1>
                 {slide.subheadline && (
@@ -80,7 +80,7 @@ export const HeroCarouselBlock: React.FC<HeroCarouselBlockProps> = ({
                 {slide.link?.label && (
                   <CMSLink
                     {...slide.link}
-                    className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-pixy-rose px-10 font-display text-sm font-medium tracking-[0.12em] text-white uppercase transition-colors hover:bg-pixy-rose-dark"
+                    className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-pixy-rose px-10 pixy-button-label text-white transition-colors hover:bg-pixy-rose-dark"
                   />
                 )}
               </div>

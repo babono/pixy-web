@@ -5,7 +5,7 @@ import React from 'react'
 export type PixyButtonAppearance = 'solid' | 'outline' | 'light'
 
 const base =
-  'inline-flex items-center justify-center gap-2 rounded-full font-display uppercase tracking-[0.12em] text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pixy-rose'
+  'pixy-button-label inline-flex items-center justify-center gap-2 rounded-full transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pixy-rose'
 
 const appearances: Record<PixyButtonAppearance, string> = {
   solid: 'bg-pixy-rose text-white hover:bg-pixy-rose-dark',

@@ -11,10 +11,11 @@ import { SectionHeading } from '@/components/pixy/SectionHeading'
 import { cn } from '@/utilities/ui'
 
 const tintClasses: Record<NonNullable<ProductCategory['tint']>, string> = {
-  lavender: 'bg-pixy-tile-lavender',
-  sky: 'bg-pixy-tile-sky',
-  mint: 'bg-pixy-tile-mint',
-  pink: 'bg-pixy-tile-pink',
+  lavender: 'pixy-tile-lavender',
+  sky: 'pixy-tile-sky',
+  mint: 'pixy-tile-mint',
+  pink: 'pixy-tile-pink',
+  rose: 'pixy-tile-rose',
 }
 
 export const CategoryGridBlock: React.FC<CategoryGridBlockProps> = async ({
@@ -40,11 +41,11 @@ export const CategoryGridBlock: React.FC<CategoryGridBlockProps> = async ({
   if (!resolved.length) return null
 
   return (
-    <section className="w-full bg-pixy-cream py-14 md:py-20">
+    <section className="w-full bg-pixy-surface py-14 md:py-20">
       <div className="container">
         <SectionHeading>{heading}</SectionHeading>
 
-        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {resolved.map((category) => (
             <Link
               className={cn(
@@ -55,22 +56,24 @@ export const CategoryGridBlock: React.FC<CategoryGridBlockProps> = async ({
               key={category.id}
             >
               {typeof category.image === 'object' && category.image !== null && (
+                /**
+                 * The tile art is photographed on white, so `multiply` drops
+                 * that backdrop and lets the tint gradient read through —
+                 * matching the Figma, where art and tint are one surface.
+                 */
                 <Media
                   fill
-                  imgClassName="object-cover object-top opacity-95"
+                  imgClassName="object-contain object-right mix-blend-multiply"
                   resource={category.image}
                   size="(max-width: 1024px) 50vw, 25vw"
                 />
               )}
 
-              {/* Fades the tile art so the label keeps contrast on every tint */}
-              <div className="absolute inset-x-0 bottom-0 h-2/3 bg-linear-to-t from-black/25 to-transparent" />
-
               <span className="relative flex w-full items-center justify-between gap-2">
-                <span className="font-display text-base font-medium text-white drop-shadow-sm md:text-lg">
+                <span className="text-base font-bold text-pixy-ink">
                   {category.title}
                 </span>
-                <ChevronRight className="size-5 shrink-0 text-white" />
+                <ChevronRight className="size-5 shrink-0 text-pixy-chevron" />
               </span>
             </Link>
           ))}

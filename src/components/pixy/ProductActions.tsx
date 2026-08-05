@@ -20,14 +20,15 @@ export const ProductActions: React.FC<{ actions: Product['actions']; className?:
   if (!actions?.length) return null
 
   return (
-    <div className={cn('flex flex-wrap gap-3', className)}>
+    // Figma: two 227×48 buttons, 20px apart
+    <div className={cn('flex flex-wrap gap-3 md:gap-5', className)}>
       {actions.map((action: Action, index) => {
         const Icon = action.icon && action.icon !== 'none' ? icons[action.icon] : null
 
         return (
           <PixyButton
             appearance={action.appearance === 'outline' ? 'outline' : 'solid'}
-            className="min-w-[9.5rem] flex-1 sm:flex-none"
+            className="h-12 min-w-[9.5rem] flex-1 md:w-[227px] md:flex-none"
             href={action.url}
             key={action.id ?? index}
             newTab={action.newTab}

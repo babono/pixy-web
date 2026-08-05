@@ -71,6 +71,7 @@ export interface Config {
     posts: Post;
     products: Product;
     'product-categories': ProductCategory;
+    'as-seen-on': AsSeenOn;
     marketplaces: Marketplace;
     media: Media;
     categories: Category;
@@ -96,6 +97,7 @@ export interface Config {
     posts: PostsSelect<false> | PostsSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     'product-categories': ProductCategoriesSelect<false> | ProductCategoriesSelect<true>;
+    'as-seen-on': AsSeenOnSelect<false> | AsSeenOnSelect<true>;
     marketplaces: MarketplacesSelect<false> | MarketplacesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
@@ -221,6 +223,7 @@ export interface Page {
     | CategoryGridBlock
     | ProductGridBlock
     | MarketplaceLinksBlock
+    | AsSeenOnFeedBlock
     | ArticleGridBlock
     | SocialStripBlock
     | CallToActionBlock
@@ -304,6 +307,7 @@ export interface Post {
 export interface Media {
   id: string;
   alt?: string | null;
+  cloudinaryVersion?: number | null;
   caption?: {
     root: {
       type: string;
@@ -473,7 +477,10 @@ export interface User {
 export interface Product {
   id: string;
   title: string;
-  category: string | ProductCategory;
+  /**
+   * A product can sit in several categories — the first is the primary one, used for breadcrumbs.
+   */
+  category: (string | ProductCategory)[];
   /**
    * In rupiah, without separators. e.g. 62100 renders as Rp62.100
    */
@@ -492,6 +499,30 @@ export interface Product {
   highlights?:
     | {
         label: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Colour variants. The swatch drives the on-page colour chip; the image replaces the gallery when a shade is selected.
+   */
+  shades?:
+    | {
+        name: string;
+        /**
+         * Hex colour, e.g. #DB9C77
+         */
+        swatch?: string | null;
+        image?: (string | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Where this specific product can be bought. Distinct from the site-wide Marketplaces list, since the URL is per-product.
+   */
+  buyLinks?:
+    | {
+        retailer: string;
+        url: string;
         id?: string | null;
       }[]
     | null;
@@ -589,7 +620,7 @@ export interface ProductCategory {
   /**
    * Background colour of the category tile.
    */
-  tint: 'lavender' | 'sky' | 'mint' | 'pink';
+  tint: 'lavender' | 'sky' | 'mint' | 'pink' | 'rose';
   /**
    * Shown at the top of the category listing page.
    */
@@ -749,6 +780,98 @@ export interface Marketplace {
    * Link to the PIXY official store on this marketplace.
    */
   url: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "AsSeenOnFeedBlock".
+ */
+export interface AsSeenOnFeedBlock {
+  heading: string;
+  source: 'latest' | 'manual';
+  items?: (string | AsSeenOn)[] | null;
+  limit?: number | null;
+  cta?: {
+    enabled?: boolean | null;
+    link?: {
+      type?: ('reference' | 'custom') | null;
+      newTab?: boolean | null;
+      reference?:
+        | ({
+            relationTo: 'pages';
+            value: string | Page;
+          } | null)
+        | ({
+            relationTo: 'posts';
+            value: string | Post;
+          } | null)
+        | ({
+            relationTo: 'products';
+            value: string | Product;
+          } | null)
+        | ({
+            relationTo: 'product-categories';
+            value: string | ProductCategory;
+          } | null);
+      url?: string | null;
+      label: string;
+    };
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'asSeenOnFeed';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "as-seen-on".
+ */
+export interface AsSeenOn {
+  id: string;
+  /**
+   * Title or description of this video clip for admin reference.
+   */
+  title: string;
+  /**
+   * MP4 video file uploaded to Media for hover autoplay.
+   */
+  video?: (string | null) | Media;
+  /**
+   * Optional direct MP4 URL string if video is hosted on CDN.
+   */
+  videoUrl?: string | null;
+  /**
+   * Thumbnail / poster image shown when video is paused or before hover.
+   */
+  thumbnail: string | Media;
+  /**
+   * Linked Payload Product. Auto-populates title, price, image & CTA URL.
+   */
+  product?: (string | null) | Product;
+  /**
+   * Fallback product info if not linking to a Payload Product.
+   */
+  customProduct?: {
+    name?: string | null;
+    /**
+     * Price in Rupiah (e.g. 119000 renders as IDR 119.000).
+     */
+    price?: number | null;
+    category?: string | null;
+    image?: (string | null) | Media;
+    /**
+     * CTA link destination (e.g. /products/dewdrop).
+     */
+    url?: string | null;
+  };
+  /**
+   * Optional original TikTok URL link.
+   */
+  tiktokUrl?: string | null;
+  /**
+   * Order weight (lower numbers appear first).
+   */
+  sortOrder?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1366,6 +1489,10 @@ export interface PayloadLockedDocument {
         value: string | ProductCategory;
       } | null)
     | ({
+        relationTo: 'as-seen-on';
+        value: string | AsSeenOn;
+      } | null)
+    | ({
         relationTo: 'marketplaces';
         value: string | Marketplace;
       } | null)
@@ -1479,6 +1606,7 @@ export interface PagesSelect<T extends boolean = true> {
         categoryGrid?: T | CategoryGridBlockSelect<T>;
         productGrid?: T | ProductGridBlockSelect<T>;
         marketplaceLinks?: T | MarketplaceLinksBlockSelect<T>;
+        asSeenOnFeed?: T | AsSeenOnFeedBlockSelect<T>;
         articleGrid?: T | ArticleGridBlockSelect<T>;
         socialStrip?: T | SocialStripBlockSelect<T>;
         cta?: T | CallToActionBlockSelect<T>;
@@ -1589,6 +1717,32 @@ export interface ProductGridBlockSelect<T extends boolean = true> {
 export interface MarketplaceLinksBlockSelect<T extends boolean = true> {
   heading?: T;
   marketplaces?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "AsSeenOnFeedBlock_select".
+ */
+export interface AsSeenOnFeedBlockSelect<T extends boolean = true> {
+  heading?: T;
+  source?: T;
+  items?: T;
+  limit?: T;
+  cta?:
+    | T
+    | {
+        enabled?: T;
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              label?: T;
+            };
+      };
   id?: T;
   blockName?: T;
 }
@@ -1758,6 +1912,21 @@ export interface ProductsSelect<T extends boolean = true> {
         label?: T;
         id?: T;
       };
+  shades?:
+    | T
+    | {
+        name?: T;
+        swatch?: T;
+        image?: T;
+        id?: T;
+      };
+  buyLinks?:
+    | T
+    | {
+        retailer?: T;
+        url?: T;
+        id?: T;
+      };
   actions?:
     | T
     | {
@@ -1810,6 +1979,30 @@ export interface ProductCategoriesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "as-seen-on_select".
+ */
+export interface AsSeenOnSelect<T extends boolean = true> {
+  title?: T;
+  video?: T;
+  videoUrl?: T;
+  thumbnail?: T;
+  product?: T;
+  customProduct?:
+    | T
+    | {
+        name?: T;
+        price?: T;
+        category?: T;
+        image?: T;
+        url?: T;
+      };
+  tiktokUrl?: T;
+  sortOrder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "marketplaces_select".
  */
 export interface MarketplacesSelect<T extends boolean = true> {
@@ -1825,6 +2018,7 @@ export interface MarketplacesSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  cloudinaryVersion?: T;
   caption?: T;
   folder?: T;
   updatedAt?: T;
@@ -2310,6 +2504,10 @@ export interface Header {
  */
 export interface Footer {
   id: string;
+  /**
+   * Reversed (white) wordmark. Falls back to the text wordmark when empty.
+   */
+  logo?: (string | null) | Media;
   tagline?: string | null;
   /**
    * Each column becomes one heading with a list of links beneath it.
@@ -2462,6 +2660,7 @@ export interface HeaderSelect<T extends boolean = true> {
  * via the `definition` "footer_select".
  */
 export interface FooterSelect<T extends boolean = true> {
+  logo?: T;
   tagline?: T;
   columns?:
     | T

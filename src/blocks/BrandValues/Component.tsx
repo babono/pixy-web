@@ -6,7 +6,7 @@ import { Media } from '@/components/Media'
 import { SectionHeading } from '@/components/pixy/SectionHeading'
 
 export const BrandValuesBlock: React.FC<BrandValuesBlockProps> = ({ body, heading, values }) => (
-  <section className="pixy-gradient-blush-soft w-full py-14 md:py-20">
+  <section className="pixy-gradient-blush w-full py-14 md:py-20">
     <div className="container grid gap-8 md:grid-cols-2 md:items-center md:gap-16">
       <div>
         <SectionHeading className="whitespace-pre-line">{heading}</SectionHeading>

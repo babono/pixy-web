@@ -68,8 +68,13 @@ export const Products: CollectionConfig<'products'> = {
                   name: 'category',
                   type: 'relationship',
                   relationTo: 'product-categories',
+                  hasMany: true,
                   required: true,
-                  admin: { width: '50%' },
+                  admin: {
+                    width: '50%',
+                    description:
+                      'A product can sit in several categories — the first is the primary one, used for breadcrumbs.',
+                  },
                 },
                 {
                   name: 'price',
@@ -113,6 +118,75 @@ export const Products: CollectionConfig<'products'> = {
                   name: 'label',
                   type: 'text',
                   required: true,
+                },
+              ],
+            },
+            {
+              name: 'shades',
+              type: 'array',
+              labels: { singular: 'Shade', plural: 'Shades' },
+              admin: {
+                description:
+                  'Colour variants. The swatch drives the on-page colour chip; the image replaces the gallery when a shade is selected.',
+                initCollapsed: true,
+              },
+              fields: [
+                {
+                  type: 'row',
+                  fields: [
+                    {
+                      name: 'name',
+                      type: 'text',
+                      required: true,
+                      admin: { width: '50%' },
+                    },
+                    {
+                      name: 'swatch',
+                      type: 'text',
+                      admin: {
+                        width: '50%',
+                        description: 'Hex colour, e.g. #DB9C77',
+                      },
+                      validate: (value: string | null | undefined) =>
+                        !value ||
+                        /^#[0-9a-fA-F]{6}$/.test(value) ||
+                        'Enter a 6-digit hex colour such as #DB9C77',
+                    },
+                  ],
+                },
+                {
+                  name: 'image',
+                  type: 'upload',
+                  relationTo: 'media',
+                },
+              ],
+            },
+            {
+              name: 'buyLinks',
+              type: 'array',
+              labels: { singular: 'Buy link', plural: 'Buy links' },
+              admin: {
+                description:
+                  'Where this specific product can be bought. Distinct from the site-wide Marketplaces list, since the URL is per-product.',
+                initCollapsed: true,
+              },
+              fields: [
+                {
+                  type: 'row',
+                  fields: [
+                    {
+                      name: 'retailer',
+                      type: 'text',
+                      required: true,
+                      admin: { width: '35%' },
+                    },
+                    {
+                      name: 'url',
+                      type: 'text',
+                      required: true,
+                      admin: { width: '65%' },
+                    },
+                  ],
                 },
               ],
             },

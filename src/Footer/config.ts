@@ -14,6 +14,14 @@ export const Footer: GlobalConfig = {
   },
   fields: [
     {
+      name: 'logo',
+      type: 'upload',
+      relationTo: 'media',
+      admin: {
+        description: 'Reversed (white) wordmark. Falls back to the text wordmark when empty.',
+      },
+    },
+    {
       name: 'tagline',
       type: 'textarea',
       defaultValue:
