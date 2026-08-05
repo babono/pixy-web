@@ -6,8 +6,13 @@
   "type": "module",
   "scripts": {
     "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
+    "postinstall": "npm run sync:mediapipe",
+    "prebuild": "npm run sync:mediapipe",
+    "predev": "npm run sync:mediapipe",
+    "sync:mediapipe": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/sync-mediapipe.ts",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "dev:prod": "cross-env NODE_OPTIONS=--no-deprecation rm -rf .next && pnpm build && pnpm start",
+    "enable:tryon": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/enable-tryon.ts",
     "figma:assets": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/figma-assets.ts",
     "figma:pull": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/figma-pull.ts",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
@@ -27,6 +32,7 @@
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
   },
   "dependencies": {
+    "@mediapipe/tasks-vision": "1.0.1",
     "@payloadcms/admin-bar": "3.86.0",
     "@payloadcms/db-mongodb": "3.86.0",
     "@payloadcms/live-preview-react": "3.86.0",
@@ -40,6 +46,7 @@
     "@payloadcms/richtext-lexical": "3.86.0",
     "@payloadcms/ui": "3.86.0",
     "@radix-ui/react-checkbox": "^1.0.4",
+    "@radix-ui/react-dialog": "^1.1.23",
     "@radix-ui/react-label": "^2.0.2",
     "@radix-ui/react-select": "^2.0.0",
     "@radix-ui/react-slot": "^1.0.2",

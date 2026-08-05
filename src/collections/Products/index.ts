@@ -162,6 +162,45 @@ export const Products: CollectionConfig<'products'> = {
               ],
             },
             {
+              name: 'virtualTryOn',
+              type: 'group',
+              label: 'Virtual Try-On',
+              admin: {
+                description:
+                  'Adds a "Try Me" button that opens the camera filter. Needs at least one shade with a swatch colour.',
+              },
+              fields: [
+                {
+                  name: 'enabled',
+                  type: 'checkbox',
+                  label: 'Enable Try Me',
+                  defaultValue: false,
+                },
+                {
+                  name: 'finish',
+                  type: 'select',
+                  defaultValue: 'cream',
+                  /**
+                   * Catalogue swatches are opaque product colours; painting
+                   * them on at full strength looks like poster paint. The
+                   * finish sets how much pigment and shine the renderer
+                   * applies — see FINISHES in useLipRenderer.ts.
+                   */
+                  admin: {
+                    condition: (_, siblingData) => Boolean(siblingData?.enabled),
+                    description: 'Controls coverage and shine in the try-on preview.',
+                  },
+                  options: [
+                    { label: 'Sheer — lip conditioner, balm', value: 'sheer' },
+                    { label: 'Tint — liptint, stain', value: 'tint' },
+                    { label: 'Cream — lip cream, everyday colour', value: 'cream' },
+                    { label: 'Matte — full coverage, no shine', value: 'matte' },
+                    { label: 'Vinyl — high gloss, wet look', value: 'vinyl' },
+                  ],
+                },
+              ],
+            },
+            {
               name: 'buyLinks',
               type: 'array',
               labels: { singular: 'Buy link', plural: 'Buy links' },

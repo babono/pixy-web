@@ -19,6 +19,8 @@ import { ProductCard } from '@/components/pixy/ProductCard'
 import { ProductGallery } from '@/components/pixy/ProductGallery'
 import { ProductReviews } from '@/components/pixy/ProductReviews'
 import { SectionHeading } from '@/components/pixy/SectionHeading'
+import { TryOnButton } from '@/components/pixy/TryOn/TryOnButton'
+import { tryOnShades } from '@/components/pixy/TryOn/ShadeSwatches'
 import { generateMeta } from '@/utilities/generateMeta'
 import PageClient from './page.client'
 
@@ -57,6 +59,10 @@ export default async function ProductPage({ params: paramsPromise }: Args) {
     (image): image is MediaType => typeof image === 'object' && image !== null,
   )
   const related = await queryRelatedProducts(product)
+
+  // "Try Me" needs both an editor opt-in and at least one shade carrying a hex.
+  const shades = tryOnShades(product)
+  const showTryOn = Boolean(product.virtualTryOn?.enabled) && shades.length > 0
 
   return (
     <article className="pt-28">
@@ -101,7 +107,16 @@ export default async function ProductPage({ params: paramsPromise }: Args) {
             )}
 
             {/* Hidden on mobile — the same buttons live in the sticky bottom bar */}
-            <ProductActions actions={product.actions} className="mt-2 hidden md:flex" />
+            <div className="mt-2 hidden md:flex md:flex-wrap md:items-center md:gap-3">
+              <ProductActions actions={product.actions} />
+              {showTryOn && (
+                <TryOnButton
+                  finish={product.virtualTryOn?.finish ?? 'cream'}
+                  productTitle={product.title}
+                  shades={shades}
+                />
+              )}
+            </div>
 
             {Boolean(product.highlights?.length) && (
               <ul className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3 border-t border-pixy-blush-200 pt-6">
@@ -187,11 +202,19 @@ export default async function ProductPage({ params: paramsPromise }: Args) {
       )}
 
       {/* Mobile purchase bar; padding below keeps it clear of the footer */}
-      {Boolean(product.actions?.length) && (
+      {(Boolean(product.actions?.length) || showTryOn) && (
         <>
           <div className="h-24 md:hidden" />
-          <div className="fixed inset-x-0 bottom-0 z-40 border-t border-pixy-blush-200 bg-white/95 p-3 backdrop-blur-sm md:hidden">
-            <ProductActions actions={product.actions} className="flex-nowrap" />
+          <div className="fixed inset-x-0 bottom-0 z-40 flex gap-3 border-t border-pixy-blush-200 bg-white/95 p-3 backdrop-blur-sm md:hidden">
+            {showTryOn && (
+              <TryOnButton
+                className="shrink-0 px-4"
+                finish={product.virtualTryOn?.finish ?? 'cream'}
+                productTitle={product.title}
+                shades={shades}
+              />
+            )}
+            <ProductActions actions={product.actions} className="flex-1 flex-nowrap" />
           </div>
         </>
       )}

@@ -517,6 +517,16 @@ export interface Product {
       }[]
     | null;
   /**
+   * Adds a "Try Me" button that opens the camera filter. Needs at least one shade with a swatch colour.
+   */
+  virtualTryOn?: {
+    enabled?: boolean | null;
+    /**
+     * Controls coverage and shine in the try-on preview.
+     */
+    finish?: ('sheer' | 'tint' | 'cream' | 'matte' | 'vinyl') | null;
+  };
+  /**
    * Where this specific product can be bought. Distinct from the site-wide Marketplaces list, since the URL is per-product.
    */
   buyLinks?:
@@ -1919,6 +1929,12 @@ export interface ProductsSelect<T extends boolean = true> {
         swatch?: T;
         image?: T;
         id?: T;
+      };
+  virtualTryOn?:
+    | T
+    | {
+        enabled?: T;
+        finish?: T;
       };
   buyLinks?:
     | T
