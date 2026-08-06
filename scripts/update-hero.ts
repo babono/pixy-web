@@ -104,8 +104,9 @@ const run = async () => {
     collection: 'pages',
     id: home.id,
     context: { disableRevalidate: true },
-    // The og:image is the first slide's artwork, same as the seed sets it.
-    data: { layout, meta: { ...home.meta, image: pairs[0].desktop.id } },
+    // `meta.image` is deliberately left alone: the share card is the branded
+    // `public/pixy-og.png`, not whatever artwork the carousel happens to hold.
+    data: { layout },
   })
 
   payload.logger.info(`\nUpdated ${pairs.length} slide(s).`)

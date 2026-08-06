@@ -549,10 +549,9 @@ export const seed = async ({
         },
       ],
       meta: {
-        // Left blank so the title falls back to SITE_NAME. Setting it here
-        // would stack the brand twice: "PIXY | … | PIXY - My Beauty, My Energy".
+        // Title and image both left blank on purpose: the title falls back to
+        // SITE_NAME, and the share card is the branded public/pixy-og.png.
         description: SITE_DESCRIPTION,
-        image: heroMedia[0].desktop.id,
       },
     },
     req,

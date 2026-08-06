@@ -9,12 +9,14 @@ import { SITE_NAME } from './site'
 const getImageURL = (image?: Media | Config['db']['defaultIDType'] | null) => {
   const serverUrl = getServerSideURL()
 
-  let url = serverUrl + '/website-template-OG.webp'
+  let url = serverUrl + '/pixy-og.png'
 
   if (image && typeof image === 'object' && 'url' in image) {
-    const ogUrl = image.sizes?.og?.url
+    const source = image.sizes?.og?.url || image.url
 
-    url = ogUrl ? serverUrl + ogUrl : serverUrl + image.url
+    // Cloudinary hands back absolute URLs; prefixing those produced
+    // `https://site/https://res.cloudinary.com/...`, which no scraper resolves.
+    if (source) url = /^https?:\/\//.test(source) ? source : serverUrl + source
   }
 
   return url

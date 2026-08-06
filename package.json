@@ -22,6 +22,7 @@
     "upload:videos": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/upload-videos.ts",
     "figma:assets": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/figma-assets.ts",
     "figma:pull": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/figma-pull.ts",
+    "generate:og": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/generate-og.ts",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
     "ii": "cross-env NODE_OPTIONS=--no-deprecation pnpm --ignore-workspace install",
