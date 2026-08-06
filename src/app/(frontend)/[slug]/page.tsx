@@ -6,6 +6,8 @@ import { getPayload, type RequiredDataFromCollectionSlug } from 'payload'
 import { draftMode } from 'next/headers'
 import React, { cache } from 'react'
 import { homeStatic } from '@/endpoints/seed/home-static'
+import { aboutStatic } from '@/endpoints/seed/about-static'
+import { faqStatic } from '@/endpoints/seed/faq-static'
 
 import { RenderBlocks, isBleedBlock } from '@/blocks/RenderBlocks'
 import { RenderHero } from '@/heros/RenderHero'
@@ -56,9 +58,17 @@ export default async function Page({ params: paramsPromise }: Args) {
     slug: decodedSlug,
   })
 
-  // Remove this code once your website is seeded
+  // Fallbacks for pre-seeded content so that static views are not empty
   if (!page && slug === 'home') {
     page = homeStatic
+  }
+
+  if (!page && (slug === 'about' || slug === 'about-us')) {
+    page = aboutStatic
+  }
+
+  if (!page && slug === 'faq') {
+    page = faqStatic
   }
 
   if (!page) {

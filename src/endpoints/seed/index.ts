@@ -7,6 +7,8 @@ import type { Marketplace, Media, Product, ProductCategory } from '@/payload-typ
 
 import { contactForm as contactFormData } from './contact-form'
 import { contact as contactPageData } from './contact-page'
+import { aboutPageData } from './about-page'
+import { faqPageData } from './faq-page'
 import {
   asset,
   categoryAssets,
@@ -73,11 +75,32 @@ const productCategories = [
   },
 ]
 
+/** PIXY's official storefronts, not the marketplaces' home pages. */
 const marketplaces = [
-  { name: 'Tokopedia', url: 'https://www.tokopedia.com/', color: '#42B549', initial: 'T' },
-  { name: 'Shopee', url: 'https://shopee.co.id/', color: '#EE4D2D', initial: 'S' },
-  { name: 'TikTok Shop', url: 'https://www.tiktok.com/shop', color: '#010101', initial: 'd' },
-  { name: 'Lazada', url: 'https://www.lazada.co.id/', color: '#F1494E', initial: 'L' },
+  {
+    name: 'Tokopedia',
+    url: 'https://www.tokopedia.com/pixyofficial',
+    color: '#42B549',
+    initial: 'T',
+  },
+  {
+    name: 'Shopee',
+    url: 'https://shopee.co.id/pixyindonesia',
+    color: '#EE4D2D',
+    initial: 'S',
+  },
+  {
+    name: 'TikTok Shop',
+    url: 'https://www.tiktok.com/@pixycosmetics_id',
+    color: '#010101',
+    initial: 'd',
+  },
+  {
+    name: 'Lazada',
+    url: 'https://www.lazada.co.id/tag/pixy-official-store-indonesia/',
+    color: '#F1494E',
+    initial: 'L',
+  },
 ]
 
 const brandValues = [
@@ -418,6 +441,24 @@ export const seed = async ({
     req,
   })
 
+  const aboutPage = await payload.create({
+    collection: 'pages',
+    depth: 0,
+    context: { disableRevalidate: true },
+    data: aboutPageData({
+      valueMediaIds: valueMedia.map((m) => m.id),
+    }),
+    req,
+  })
+
+  const faqPage = await payload.create({
+    collection: 'pages',
+    depth: 0,
+    context: { disableRevalidate: true },
+    data: faqPageData(),
+    req,
+  })
+
   await payload.create({
     collection: 'pages',
     depth: 0,
@@ -546,8 +587,9 @@ export const seed = async ({
         {
           link: {
             type: 'reference',
-            reference: { relationTo: 'pages', value: contactPage.id },
+            reference: { relationTo: 'pages', value: aboutPage.id },
             label: 'About',
+            url: '/about',
           },
         },
       ],
@@ -592,13 +634,21 @@ export const seed = async ({
             {
               link: {
                 type: 'reference' as const,
-                reference: { relationTo: 'pages' as const, value: contactPage.id },
+                reference: { relationTo: 'pages' as const, value: aboutPage.id },
                 label: 'About Us',
+                url: '/about',
               },
             },
             { link: { type: 'custom' as const, url: '/products', label: 'Promos & Offers' } },
             { link: { type: 'custom' as const, url: '/posts', label: 'News & Updates' } },
-            { link: { type: 'custom' as const, url: '/search', label: 'FAQ' } },
+            {
+              link: {
+                type: 'reference' as const,
+                reference: { relationTo: 'pages' as const, value: faqPage.id },
+                label: 'FAQ',
+                url: '/faq',
+              },
+            },
           ],
         },
       ],

@@ -5,7 +5,17 @@ export const beforeSyncWithSearch: BeforeSync = async ({ req, originalDoc, searc
     doc: { relationTo: collection },
   } = searchDoc
 
-  const { slug, id, categories, title, meta } = originalDoc
+  const { slug, id, categories, title, meta, images, shortDescription } = originalDoc
+
+  /**
+   * Products carry no SEO image — the packshot lives in `images` — so results
+   * would render the "No image" placeholder without this fallback.
+   */
+  const firstImage = Array.isArray(images) ? images[0] : undefined
+  const image =
+    meta?.image?.id ||
+    meta?.image ||
+    (typeof firstImage === 'object' && firstImage !== null ? firstImage.id : firstImage)
 
   const modifiedDoc: DocToSync = {
     ...searchDoc,
@@ -13,8 +23,8 @@ export const beforeSyncWithSearch: BeforeSync = async ({ req, originalDoc, searc
     meta: {
       ...meta,
       title: meta?.title || title,
-      image: meta?.image?.id || meta?.image,
-      description: meta?.description,
+      image,
+      description: meta?.description || shortDescription,
     },
     categories: [],
   }

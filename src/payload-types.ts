@@ -219,7 +219,9 @@ export interface Page {
   };
   layout: (
     | HeroCarouselBlock
+    | BrandProfileBlock
     | BrandValuesBlock
+    | FaqBlockProps
     | CategoryGridBlock
     | ProductGridBlock
     | MarketplaceLinksBlock
@@ -695,6 +697,23 @@ export interface HeroCarouselBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BrandProfileBlock".
+ */
+export interface BrandProfileBlock {
+  title: string;
+  subtitle: string;
+  paragraphs?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'brandProfile';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "BrandValuesBlock".
  */
 export interface BrandValuesBlock {
@@ -713,6 +732,33 @@ export interface BrandValuesBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'brandValues';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FaqBlockProps".
+ */
+export interface FaqBlockProps {
+  title: string;
+  subtitle?: string | null;
+  items?:
+    | {
+        question: string;
+        /**
+         * Optional when the answer is made up entirely of bullet items.
+         */
+        answer?: string | null;
+        listItems?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'faqBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1619,7 +1665,9 @@ export interface PagesSelect<T extends boolean = true> {
     | T
     | {
         heroCarousel?: T | HeroCarouselBlockSelect<T>;
+        brandProfile?: T | BrandProfileBlockSelect<T>;
         brandValues?: T | BrandValuesBlockSelect<T>;
+        faqBlock?: T | FaqBlockPropsSelect<T>;
         categoryGrid?: T | CategoryGridBlockSelect<T>;
         productGrid?: T | ProductGridBlockSelect<T>;
         marketplaceLinks?: T | MarketplaceLinksBlockSelect<T>;
@@ -1676,6 +1724,22 @@ export interface HeroCarouselBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BrandProfileBlock_select".
+ */
+export interface BrandProfileBlockSelect<T extends boolean = true> {
+  title?: T;
+  subtitle?: T;
+  paragraphs?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "BrandValuesBlock_select".
  */
 export interface BrandValuesBlockSelect<T extends boolean = true> {
@@ -1686,6 +1750,29 @@ export interface BrandValuesBlockSelect<T extends boolean = true> {
     | {
         label?: T;
         icon?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FaqBlockProps_select".
+ */
+export interface FaqBlockPropsSelect<T extends boolean = true> {
+  title?: T;
+  subtitle?: T;
+  items?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        listItems?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
         id?: T;
       };
   id?: T;

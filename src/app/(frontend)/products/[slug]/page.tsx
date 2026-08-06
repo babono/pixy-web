@@ -13,6 +13,7 @@ import { LivePreviewListener } from '@/components/LivePreviewListener'
 import { PayloadRedirects } from '@/components/PayloadRedirects'
 import RichText from '@/components/RichText'
 import { Breadcrumbs } from '@/components/pixy/Breadcrumbs'
+import { BuyNowButton } from '@/components/pixy/BuyNowButton'
 import { formatPrice } from '@/components/pixy/format'
 import { ProductActions } from '@/components/pixy/ProductActions'
 import { ProductCard } from '@/components/pixy/ProductCard'
@@ -64,6 +65,12 @@ export default async function ProductPage({ params: paramsPromise }: Args) {
   const shades = tryOnShades(product)
   const showTryOn = Boolean(product.virtualTryOn?.enabled) && shades.length > 0
 
+  // Most products sell through several retailers, so "Buy Now" offers the
+  // choice rather than silently picking the first one.
+  const buyLinks = (product.buyLinks ?? []).filter((link) => link.retailer && link.url)
+  const marketplaceLogos = buyLinks.length > 1 ? await queryMarketplaceLogos() : undefined
+  const showActions = Boolean(product.actions?.length) || buyLinks.length > 0 || showTryOn
+
   return (
     <article className="pt-28">
       <PageClient />
@@ -108,6 +115,12 @@ export default async function ProductPage({ params: paramsPromise }: Args) {
 
             {/* Hidden on mobile — the same buttons live in the sticky bottom bar */}
             <div className="mt-2 hidden md:flex md:flex-wrap md:items-center md:gap-3">
+              <BuyNowButton
+                buyLinks={buyLinks}
+                className="md:w-[227px]"
+                logos={marketplaceLogos}
+                productTitle={product.title}
+              />
               <ProductActions actions={product.actions} />
               {showTryOn && (
                 <TryOnButton
@@ -202,7 +215,7 @@ export default async function ProductPage({ params: paramsPromise }: Args) {
       )}
 
       {/* Mobile purchase bar; padding below keeps it clear of the footer */}
-      {(Boolean(product.actions?.length) || showTryOn) && (
+      {showActions && (
         <>
           <div className="h-24 md:hidden" />
           <div className="fixed inset-x-0 bottom-0 z-40 flex gap-3 border-t border-pixy-blush-200 bg-white/95 p-3 backdrop-blur-sm md:hidden">
@@ -214,6 +227,12 @@ export default async function ProductPage({ params: paramsPromise }: Args) {
                 shades={shades}
               />
             )}
+            <BuyNowButton
+              buyLinks={buyLinks}
+              className="flex-1 px-4"
+              logos={marketplaceLogos}
+              productTitle={product.title}
+            />
             <ProductActions actions={product.actions} className="flex-1 flex-nowrap" />
           </div>
         </>
@@ -244,6 +263,30 @@ const queryProductBySlug = cache(async ({ slug }: { slug: string }) => {
   })
 
   return result.docs?.[0] || null
+})
+
+/**
+ * Marketplace logos, keyed by lowercased name, so the "Where to buy" sheet can
+ * badge the retailers it recognises. Buy links are free text and cover shops
+ * that aren't in the collection (Sociolla, Guardian), which simply get an
+ * initial instead.
+ */
+const queryMarketplaceLogos = cache(async (): Promise<Record<string, MediaType>> => {
+  const payload = await getPayload({ config: configPromise })
+  const { docs } = await payload.find({
+    collection: 'marketplaces',
+    depth: 1,
+    limit: 20,
+    pagination: false,
+  })
+
+  return Object.fromEntries(
+    docs.flatMap((marketplace) =>
+      typeof marketplace.logo === 'object' && marketplace.logo !== null
+        ? [[marketplace.name.toLowerCase(), marketplace.logo]]
+        : [],
+    ),
+  )
 })
 
 /**

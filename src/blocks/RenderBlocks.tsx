@@ -5,10 +5,12 @@ import type { Page } from '@/payload-types'
 import { ArchiveBlock } from '@/blocks/ArchiveBlock/Component'
 import { ArticleGridBlock } from '@/blocks/ArticleGrid/Component'
 import { AsSeenOnFeedBlock } from '@/blocks/AsSeenOnFeed/Component'
+import { BrandProfileBlock } from '@/blocks/BrandProfile/Component'
 import { BrandValuesBlock } from '@/blocks/BrandValues/Component'
 import { CallToActionBlock } from '@/blocks/CallToAction/Component'
 import { CategoryGridBlock } from '@/blocks/CategoryGrid/Component'
 import { ContentBlock } from '@/blocks/Content/Component'
+import { FaqBlock } from '@/blocks/FaqBlock/Component'
 import { FormBlock } from '@/blocks/Form/Component'
 import { HeroCarouselBlock } from '@/blocks/HeroCarousel/Component'
 import { MarketplaceLinksBlock } from '@/blocks/MarketplaceLinks/Component'
@@ -20,10 +22,12 @@ const blockComponents = {
   archive: ArchiveBlock,
   articleGrid: ArticleGridBlock,
   asSeenOnFeed: AsSeenOnFeedBlock,
+  brandProfile: BrandProfileBlock,
   brandValues: BrandValuesBlock,
   categoryGrid: CategoryGridBlock,
   content: ContentBlock,
   cta: CallToActionBlock,
+  faqBlock: FaqBlock,
   formBlock: FormBlock,
   heroCarousel: HeroCarouselBlock,
   marketplaceLinks: MarketplaceLinksBlock,
@@ -40,8 +44,10 @@ const blockComponents = {
 const bleedBlocks = new Set([
   'articleGrid',
   'asSeenOnFeed',
+  'brandProfile',
   'brandValues',
   'categoryGrid',
+  'faqBlock',
   'heroCarousel',
   'marketplaceLinks',
   'productGrid',

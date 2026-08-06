@@ -5,10 +5,12 @@ import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
 import { Archive } from '../../blocks/ArchiveBlock/config'
 import { ArticleGrid } from '../../blocks/ArticleGrid/config'
 import { AsSeenOnFeed } from '../../blocks/AsSeenOnFeed/config'
+import { BrandProfile } from '../../blocks/BrandProfile/config'
 import { BrandValues } from '../../blocks/BrandValues/config'
 import { CallToAction } from '../../blocks/CallToAction/config'
 import { CategoryGrid } from '../../blocks/CategoryGrid/config'
 import { Content } from '../../blocks/Content/config'
+import { FaqBlock } from '../../blocks/FaqBlock/config'
 import { FormBlock } from '../../blocks/Form/config'
 import { HeroCarousel } from '../../blocks/HeroCarousel/config'
 import { MarketplaceLinks } from '../../blocks/MarketplaceLinks/config'
@@ -83,7 +85,9 @@ export const Pages: CollectionConfig<'pages'> = {
               blocks: [
                 // PIXY storefront blocks
                 HeroCarousel,
+                BrandProfile,
                 BrandValues,
+                FaqBlock,
                 CategoryGrid,
                 ProductGrid,
                 MarketplaceLinks,

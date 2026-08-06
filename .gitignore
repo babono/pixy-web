@@ -34,3 +34,7 @@ public/mediapipe-wasm/
 
 # Local .env backups (contain credentials)
 .env.*.bak
+
+# Source clips for the As Seen On feed. Uploaded to Cloudinary by
+# `npm run seed:asseenon`; the site plays the CDN copies, not these.
+public/video/

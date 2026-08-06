@@ -212,17 +212,10 @@ const run = async () => {
           buyLinks: product.buyLinks
             .filter((link) => link.label && link.url)
             .map((link) => ({ retailer: link.label, url: link.url })),
-          actions: product.buyLinks[0]
-            ? [
-                {
-                  label: 'Buy Now',
-                  url: product.buyLinks[0].url,
-                  appearance: 'solid' as const,
-                  icon: 'cart' as const,
-                  newTab: true,
-                },
-              ]
-            : [],
+          // No auto "Buy Now" here: the product page builds it from `buyLinks`
+          // so every retailer is offered, not just the first. `actions` is left
+          // for buttons an editor adds by hand.
+          actions: [],
           reviews: product.reviews.map((review) => ({
             author: review.author,
             rating: review.rating,
@@ -272,6 +265,37 @@ const run = async () => {
   await payload.updateGlobal({
     slug: 'header',
     data: { navItems },
+    context: { disableRevalidate: true },
+  })
+
+  /**
+   * The footer's Products column points at the same categories, and a dangling
+   * reference there renders as a heading with nothing beneath it.
+   */
+  payload.logger.info('— Repointing the footer nav at the new categories…')
+
+  const footer = await payload.findGlobal({ slug: 'footer', depth: 0 })
+  const columns = (footer.columns ?? []).map((column) =>
+    column.title === 'Products'
+      ? {
+          ...column,
+          navItems: CATEGORIES.map((category) => ({
+            link: {
+              type: 'reference' as const,
+              reference: {
+                relationTo: 'product-categories' as const,
+                value: categoryDocs[category.slug].id,
+              },
+              label: category.title,
+            },
+          })),
+        }
+      : column,
+  )
+
+  await payload.updateGlobal({
+    slug: 'footer',
+    data: { columns },
     context: { disableRevalidate: true },
   })
 

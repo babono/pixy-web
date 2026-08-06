@@ -34,10 +34,19 @@ export const CMSLink: React.FC<CMSLinkType> = (props) => {
     url,
   } = props
 
-  const href =
+  let href =
     type === 'reference' && typeof reference?.value === 'object' && reference.value.slug
       ? getDocumentHref(reference.relationTo, reference.value.slug)
       : url
+
+  if (!href && label) {
+    const cleanLabel = label.toLowerCase().trim()
+    if (cleanLabel === 'about' || cleanLabel === 'about us') {
+      href = '/about'
+    } else if (cleanLabel === 'faq') {
+      href = '/faq'
+    }
+  }
 
   if (!href) return null
 
