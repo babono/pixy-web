@@ -44,11 +44,30 @@ export const logoAssets = {
   white: 'brand/logo-white.svg',
 }
 
-/** Hero slides, in carousel order. */
+/**
+ * Hero slides, in carousel order. Each carries two crops: the landscape one
+ * fills the 680px desktop band, the portrait one the 520px mobile band. The
+ * carousel serves them through a `<picture>`, so only one is ever downloaded.
+ */
 export const heroAssets = [
-  { file: 'photos/hero-model.png', name: 'pixy-hero-1' },
-  { file: 'photos/hero-pastel.png', name: 'pixy-hero-2' },
-  { file: 'photos/hero-teal.png', name: 'pixy-hero-3' },
+  {
+    file: 'photos/hero-model.png',
+    mobileFile: 'photos/hero-model-mobile.png',
+    mobileName: 'pixy-hero-1-mobile',
+    name: 'pixy-hero-1-desktop',
+  },
+  {
+    file: 'photos/hero-pastel.png',
+    mobileFile: 'photos/hero-pastel-mobile.png',
+    mobileName: 'pixy-hero-2-mobile',
+    name: 'pixy-hero-2-desktop',
+  },
+  {
+    file: 'photos/hero-teal.png',
+    mobileFile: 'photos/hero-teal-mobile.png',
+    mobileName: 'pixy-hero-3-mobile',
+    name: 'pixy-hero-3-desktop',
+  },
 ]
 
 /** Keyed by category slug so a reordered taxonomy can't silently mismatch. */

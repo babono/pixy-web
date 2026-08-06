@@ -26,6 +26,17 @@ export const HeroCarousel: Block = {
           type: 'upload',
           relationTo: 'media',
           required: true,
+          admin: { description: 'Shown from 768px up. Landscape crops work best.' },
+        },
+        {
+          name: 'imageMobile',
+          type: 'upload',
+          relationTo: 'media',
+          label: 'Image (mobile)',
+          admin: {
+            description:
+              'Optional portrait crop for screens under 768px. Falls back to the image above.',
+          },
         },
         {
           name: 'headline',

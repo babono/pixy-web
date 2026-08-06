@@ -649,7 +649,14 @@ export interface ProductCategory {
  */
 export interface HeroCarouselBlock {
   slides: {
+    /**
+     * Shown from 768px up. Landscape crops work best.
+     */
     image: string | Media;
+    /**
+     * Optional portrait crop for screens under 768px. Falls back to the image above.
+     */
+    imageMobile?: (string | null) | Media;
     /**
      * Line breaks are preserved.
      */
@@ -1648,6 +1655,7 @@ export interface HeroCarouselBlockSelect<T extends boolean = true> {
     | T
     | {
         image?: T;
+        imageMobile?: T;
         headline?: T;
         subheadline?: T;
         link?:

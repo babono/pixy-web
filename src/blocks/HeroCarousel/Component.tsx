@@ -58,6 +58,7 @@ export const HeroCarouselBlock: React.FC<HeroCarouselBlockProps> = ({
               <Media
                 fill
                 imgClassName="object-cover object-center"
+                mobileResource={slide.imageMobile}
                 priority={index === 0}
                 resource={slide.image}
                 size="100vw"

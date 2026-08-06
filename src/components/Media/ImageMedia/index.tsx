@@ -3,7 +3,7 @@
 import type { StaticImageData } from 'next/image'
 
 import { cn } from '@/utilities/ui'
-import NextImage from 'next/image'
+import NextImage, { getImageProps } from 'next/image'
 import React from 'react'
 
 import type { Props as MediaProps } from '../types'
@@ -49,6 +49,8 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
   const {
     alt: altFromProps,
     fill,
+    mobileBreakpoint = 'md',
+    mobileResource,
     pictureClassName,
     imgClassName,
     priority,
@@ -75,8 +77,6 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
     src = getMediaUrl(url, cacheTag)
   }
 
-  const loading = loadingFromProps || (!priority ? 'lazy' : undefined)
-
   // NOTE: this is used by the browser to determine which image to download at different screen sizes
   const sizes = sizeFromProps
     ? sizeFromProps
@@ -84,16 +84,83 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
         .map(([, value]) => `(max-width: ${value}px) ${value * 2}w`)
         .join(', ')
 
+  /**
+   * Art direction. Hiding a second <Image> with CSS would still cost the
+   * download — the browser fetches both — so the alternate crop goes in a
+   * <source>, which it evaluates before requesting anything.
+   */
+  const mobile =
+    mobileResource && typeof mobileResource === 'object'
+      ? getImageProps({
+          alt: mobileResource.alt || alt || '',
+          fill,
+          height: !fill ? (mobileResource.height ?? undefined) : undefined,
+          quality: 100,
+          sizes,
+          src: getMediaUrl(mobileResource.url, mobileResource.updatedAt),
+          width: !fill ? (mobileResource.width ?? undefined) : undefined,
+        }).props
+      : null
+
+  const artDirected = Boolean(mobile?.srcSet)
+  const mobileMedia = `(max-width: ${breakpoints[mobileBreakpoint] - 1}px)`
+  const desktopMedia = `(min-width: ${breakpoints[mobileBreakpoint]}px)`
+
+  /**
+   * `priority` makes Next emit a preload with no `media`, which under art
+   * direction has a phone preloading the desktop crop and *then* fetching the
+   * mobile one from <source>. So we drop Next's preload and issue two scoped
+   * ones instead — React hoists these into <head>.
+   */
+  const preload =
+    priority && artDirected
+      ? getImageProps({
+          alt: alt || '',
+          fill,
+          height: !fill ? height : undefined,
+          quality: 100,
+          sizes,
+          src,
+          width: !fill ? width : undefined,
+        }).props
+      : null
+
+  const loading = loadingFromProps || (priority ? (artDirected ? 'eager' : undefined) : 'lazy')
+
   return (
     <picture className={cn(pictureClassName)}>
+      {preload?.srcSet && mobile?.srcSet && (
+        <>
+          <link
+            as="image"
+            fetchPriority="high"
+            imageSizes={mobile.sizes}
+            imageSrcSet={mobile.srcSet}
+            media={mobileMedia}
+            rel="preload"
+          />
+          <link
+            as="image"
+            fetchPriority="high"
+            imageSizes={preload.sizes}
+            imageSrcSet={preload.srcSet}
+            media={desktopMedia}
+            rel="preload"
+          />
+        </>
+      )}
+      {mobile?.srcSet && (
+        <source media={mobileMedia} sizes={mobile.sizes} srcSet={mobile.srcSet} />
+      )}
       <NextImage
         alt={alt || ''}
         className={cn(imgClassName)}
+        fetchPriority={priority && artDirected ? 'high' : undefined}
         fill={fill}
         height={!fill ? height : undefined}
         placeholder="blur"
         blurDataURL={placeholderBlur}
-        priority={priority}
+        priority={priority && !artDirected}
         quality={100}
         loading={loading}
         sizes={sizes}

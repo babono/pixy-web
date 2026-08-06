@@ -130,7 +130,12 @@ export const seed = async ({
 
   const [heroFiles, categoryFiles, valueFiles, marketplaceFiles, editorialFiles] =
     await Promise.all([
-      Promise.all(heroAssets.map((slide) => asset(slide.file, slide.name))),
+      Promise.all(
+        heroAssets.flatMap((slide) => [
+          asset(slide.file, slide.name),
+          asset(slide.mobileFile, slide.mobileName),
+        ]),
+      ),
       Promise.all(
         productCategories.map((category) =>
           asset(categoryAssets[category.slug], `pixy-category-${category.slug}`),
@@ -168,10 +173,16 @@ export const seed = async ({
     return docs
   }
 
-  const heroMedia = await createMediaBatch(
+  // `heroFiles` alternates desktop/mobile per slide; pair them back up so the
+  // carousel can't accidentally point a slide at the other slide's crop.
+  const heroFlat = await createMediaBatch(
     heroFiles,
-    (index) => `PIXY campaign banner ${index + 1}`,
+    (index) => `PIXY campaign banner ${Math.floor(index / 2) + 1}`,
   )
+  const heroMedia = heroAssets.map((_, index) => ({
+    desktop: heroFlat[index * 2],
+    mobile: heroFlat[index * 2 + 1],
+  }))
   const categoryMedia = await createMediaBatch(
     categoryFiles,
     (index) => `${productCategories[index].title} category`,
@@ -422,13 +433,15 @@ export const seed = async ({
           intervalSeconds: 6,
           slides: [
             {
-              image: heroMedia[0].id,
+              image: heroMedia[0].desktop.id,
+              imageMobile: heroMedia[0].mobile.id,
               headline: "Don't stop\ntill you\nget enough",
               subheadline: 'Get up to 40% discount this July only.',
               link: { type: 'custom', url: '/products', label: 'Get Offer' },
             },
             {
-              image: heroMedia[1].id,
+              image: heroMedia[1].desktop.id,
+              imageMobile: heroMedia[1].mobile.id,
               headline: 'Mattenetic\nTransferproof\nLipstick',
               subheadline: '12 hours longlasting matte finish, available in 8 shades.',
               link: {
@@ -441,7 +454,8 @@ export const seed = async ({
               },
             },
             {
-              image: heroMedia[2].id,
+              image: heroMedia[2].desktop.id,
+              imageMobile: heroMedia[2].mobile.id,
               headline: 'Perfect fit,\nall day long',
               subheadline: 'Two way cake with SPF 30 PA+++ and 12 hour coverage.',
               link: {
@@ -496,7 +510,7 @@ export const seed = async ({
         title: 'PIXY | Real beauty, rooted in quality',
         description:
           'Japanese beauty expertise for your authentic, everyday glow. Halal-certified makeup and skincare from PIXY.',
-        image: heroMedia[0].id,
+        image: heroMedia[0].desktop.id,
       },
     },
     req,

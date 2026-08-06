@@ -13,6 +13,7 @@
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "dev:prod": "cross-env NODE_OPTIONS=--no-deprecation rm -rf .next && pnpm build && pnpm start",
     "enable:tryon": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/enable-tryon.ts",
+    "update:hero": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/update-hero.ts",
     "figma:assets": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/figma-assets.ts",
     "figma:pull": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" tsx scripts/figma-pull.ts",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
