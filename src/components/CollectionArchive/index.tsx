@@ -1,10 +1,18 @@
 import { cn } from '@/utilities/ui'
 import React from 'react'
 
+import type { Search } from '@/payload-types'
+
 import { Card, CardPostData } from '@/components/Card'
 
+/**
+ * Search results carry the collection they came from; posts rendered directly
+ * (the /posts archive, the Archive block) don't and are always posts.
+ */
+export type ArchiveDoc = CardPostData & { doc?: Search['doc'] }
+
 export type Props = {
-  posts: CardPostData[]
+  posts: ArchiveDoc[]
 }
 
 export const CollectionArchive: React.FC<Props> = (props) => {
@@ -18,7 +26,12 @@ export const CollectionArchive: React.FC<Props> = (props) => {
             if (typeof result === 'object' && result !== null) {
               return (
                 <div className="col-span-4" key={index}>
-                  <Card className="h-full" doc={result} relationTo="posts" showCategories />
+                  <Card
+                    className="h-full"
+                    doc={result}
+                    relationTo={result.doc?.relationTo === 'products' ? 'products' : 'posts'}
+                    showCategories
+                  />
                 </div>
               )
             }

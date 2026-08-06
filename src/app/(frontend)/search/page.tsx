@@ -1,12 +1,11 @@
 import type { Metadata } from 'next/types'
 
-import { CollectionArchive } from '@/components/CollectionArchive'
+import { CollectionArchive, type ArchiveDoc } from '@/components/CollectionArchive'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import React from 'react'
 import { Search } from '@/search/Component'
 import PageClient from './page.client'
-import { CardPostData } from '@/components/Card'
 import { SITE_NAME } from '@/utilities/site'
 
 type Args = {
@@ -27,6 +26,9 @@ export default async function Page({ searchParams: searchParamsPromise }: Args) 
       slug: true,
       categories: true,
       meta: true,
+      // Carries the source collection, which decides whether a result links to
+      // /products or /posts.
+      doc: true,
     },
     // pagination: false reduces overhead if you don't need totalDocs
     pagination: false,
@@ -74,7 +76,7 @@ export default async function Page({ searchParams: searchParamsPromise }: Args) 
       </div>
 
       {posts.totalDocs > 0 ? (
-        <CollectionArchive posts={posts.docs as CardPostData[]} />
+        <CollectionArchive posts={posts.docs as ArchiveDoc[]} />
       ) : (
         <div className="container">No results found.</div>
       )}
