@@ -22,6 +22,7 @@ import { richText } from './pixy/lexical'
 import { seedAsSeenOnItems } from './pixy/asSeenOn'
 import { seedPosts } from './pixy/posts'
 import { seedProducts } from './pixy/products'
+import { SITE_DESCRIPTION } from '@/utilities/site'
 
 const collections: CollectionSlug[] = [
   'as-seen-on',
@@ -507,9 +508,9 @@ export const seed = async ({
         },
       ],
       meta: {
-        title: 'PIXY | Real beauty, rooted in quality',
-        description:
-          'Japanese beauty expertise for your authentic, everyday glow. Halal-certified makeup and skincare from PIXY.',
+        // Left blank so the title falls back to SITE_NAME. Setting it here
+        // would stack the brand twice: "PIXY | … | PIXY - My Beauty, My Energy".
+        description: SITE_DESCRIPTION,
         image: heroMedia[0].desktop.id,
       },
     },

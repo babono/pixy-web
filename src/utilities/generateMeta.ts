@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
 
-import type { Media, Page, Post, Config } from '../payload-types'
+import type { Media, Page, Post, Product, Config } from '../payload-types'
 
 import { mergeOpenGraph } from './mergeOpenGraph'
 import { getServerSideURL } from './getURL'
+import { SITE_NAME } from './site'
 
 const getImageURL = (image?: Media | Config['db']['defaultIDType'] | null) => {
   const serverUrl = getServerSideURL()
@@ -20,15 +21,19 @@ const getImageURL = (image?: Media | Config['db']['defaultIDType'] | null) => {
 }
 
 export const generateMeta = async (args: {
-  doc: Partial<Page> | Partial<Post> | null
+  doc: Partial<Page> | Partial<Post> | Partial<Product> | null
 }): Promise<Metadata> => {
   const { doc } = args
 
   const ogImage = getImageURL(doc?.meta?.image)
 
-  const title = doc?.meta?.title
-    ? doc?.meta?.title + ' | Payload Website Template'
-    : 'Payload Website Template'
+  /**
+   * Most imported products carry no SEO title, and without a fallback they all
+   * render the same <title>. The home page is the exception: it's the brand
+   * line on its own, not "Home | …".
+   */
+  const label = doc?.meta?.title || (doc?.slug === 'home' ? null : doc?.title)
+  const title = label ? `${label} | ${SITE_NAME}` : SITE_NAME
 
   return {
     description: doc?.meta?.description,
